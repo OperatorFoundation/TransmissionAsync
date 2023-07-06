@@ -24,13 +24,13 @@ open class AsyncConnection<C: Channel>
     }
 
     // Reads exactly size bytes
-    func readSize(_ size: Int) async throws -> Data
+    public func readSize(_ size: Int) async throws -> Data
     {
         try await self.reader.read(size)
     }
 
     // reads up to maxSize bytes
-    func readMaxSize(_ maxSize: Int) async throws -> Data
+    public func readMaxSize(_ maxSize: Int) async throws -> Data
     {
         let straw: Straw = Straw()
         while straw.count < maxSize
@@ -49,7 +49,7 @@ open class AsyncConnection<C: Channel>
         return try straw.read()
     }
 
-    func readWithLengthPrefix(prefixSizeInBits: Int) async throws -> Data
+    public func readWithLengthPrefix(prefixSizeInBits: Int) async throws -> Data
     {
         let sizeInBytes: Int
 
@@ -118,17 +118,17 @@ open class AsyncConnection<C: Channel>
         }
     }
 
-    func writeString(string: String) async throws
+    public func writeString(string: String) async throws
     {
         try await self.write(string.data)
     }
 
-    func write(_ data: Data) async throws
+    public func write(_ data: Data) async throws
     {
         try await self.writer.write(data)
     }
 
-    func writeWithLengthPrefix(_ data: Data, _ prefixSizeInBits: Int) async throws
+    public func writeWithLengthPrefix(_ data: Data, _ prefixSizeInBits: Int) async throws
     {
         let length: Int = data.count
 
@@ -175,7 +175,7 @@ open class AsyncConnection<C: Channel>
         try await self.writer.write([lengthBytes, data])
     }
 
-    func close() async throws
+    public func close() async throws
     {
         self.channel.close()
     }
