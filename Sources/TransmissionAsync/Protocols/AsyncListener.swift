@@ -9,7 +9,5 @@ import Foundation
 
 public protocol AsyncListener
 {
-    associatedtype C: Channel
-
-    func accept() async throws -> AsyncConnection<C>
+    func accept() async throws -> AsyncConnection
 }

@@ -15,7 +15,7 @@ import Logging
 import Socket
 import Straw
 
-public class AsyncTcpSocketConnection: AsyncConnection<SocketChannel>
+public class AsyncTcpSocketConnection: AsyncChannelConnection<SocketChannel>
 {
     public convenience init(_ host: String, _ port: Int, _ logger: Logger) async throws
     {

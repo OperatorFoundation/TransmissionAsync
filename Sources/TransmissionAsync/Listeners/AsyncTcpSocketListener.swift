@@ -30,7 +30,7 @@ public class AsyncTcpSocketListener: AsyncListener
         self.logger = logger
     }
 
-    public func accept() async throws -> AsyncConnection<SocketChannel>
+    public func accept() async throws -> AsyncConnection
     {
         let socket = try self.listener.acceptClientConnection(invokeDelegate: false)
         return AsyncTcpSocketConnection(socket, self.logger)

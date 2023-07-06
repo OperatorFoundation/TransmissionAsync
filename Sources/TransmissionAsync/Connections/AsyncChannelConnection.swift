@@ -1,8 +1,8 @@
 //
-//  AsyncConnection.swift
+//  AsyncChannelConnection.swift
 //  
 //
-//  Created by Dr. Brandon Wiley on 7/5/23.
+//  Created by Dr. Brandon Wiley on 7/6/23.
 //
 
 import Foundation
@@ -15,7 +15,7 @@ import Logging
 import Datable
 import Straw
 
-open class AsyncConnection<C: Channel>
+open class AsyncChannelConnection<C: Channel>: AsyncConnection
 {
     let channel: C
     let reader: Reader<C.R>
