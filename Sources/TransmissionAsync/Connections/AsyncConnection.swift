@@ -6,6 +6,11 @@
 //
 
 import Foundation
+#if os(macOS) || os(iOS)
+import os.log
+#else
+import Logging
+#endif
 
 import Datable
 import Straw
@@ -15,12 +20,14 @@ open class AsyncConnection<C: Channel>
     let channel: C
     let reader: Reader<C.R>
     let writer: Writer<C.W>
+    let logger: Logger
 
-    public init(_ channel: C)
+    public init(_ channel: C, _ logger: Logger)
     {
         self.channel = channel
-        self.reader = Reader(channel.readable)
-        self.writer = Writer(channel.writable)
+        self.logger = logger
+        self.reader = Reader(channel.readable, logger)
+        self.writer = Writer(channel.writable, logger)
     }
 
     // Reads exactly size bytes

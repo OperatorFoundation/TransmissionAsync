@@ -6,14 +6,21 @@
 //
 
 import Foundation
+#if os(macOS) || os(iOS)
+import os.log
+#else
+import Logging
+#endif
 
 public actor Writer<T: Writable>
 {
     let writable: T
+    let logger: Logger
 
-    public init(_ writable: T)
+    public init(_ writable: T, _ logger: Logger)
     {
         self.writable = writable
+        self.logger = logger
     }
 
     public func write(_ data: Data) async throws

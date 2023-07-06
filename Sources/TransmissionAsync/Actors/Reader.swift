@@ -6,14 +6,21 @@
 //
 
 import Foundation
+#if os(macOS) || os(iOS)
+import os.log
+#else
+import Logging
+#endif
 
 public actor Reader<T: Readable>
 {
     let reader: T
+    let logger: Logger
 
-    public init(_ reader: T)
+    public init(_ reader: T, _ logger: Logger)
     {
         self.reader = reader
+        self.logger = logger
     }
 
     public func read(_ size: Int) async throws -> Data

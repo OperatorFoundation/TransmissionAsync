@@ -6,13 +6,18 @@
 //
 
 import Foundation
+#if os(macOS) || os(iOS)
+import os.log
+#else
+import Logging
+#endif
 
 import Socket
 import Straw
 
 public class AsyncTcpSocketConnection: AsyncConnection<SocketChannel>
 {
-    public convenience init(_ host: String, _ port: Int) async throws
+    public convenience init(_ host: String, _ port: Int, _ logger: Logger) async throws
     {
         let socket = try Socket.create()
 
@@ -31,14 +36,14 @@ public class AsyncTcpSocketConnection: AsyncConnection<SocketChannel>
             }
         }
 
-        self.init(socket)
+        self.init(socket, logger)
     }
 
-    public init(_ socket: Socket)
+    public init(_ socket: Socket, _ logger: Logger)
     {
         let channel = SocketChannel(socket)
 
-        super.init(channel)
+        super.init(channel, logger)
     }
 }
 
