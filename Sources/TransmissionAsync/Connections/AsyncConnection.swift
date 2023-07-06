@@ -10,7 +10,7 @@ import Foundation
 import Datable
 import Straw
 
-public class AsyncConnection<C: Channel>
+open class AsyncConnection<C: Channel>
 {
     let channel: C
     let reader: Reader<C.R>
