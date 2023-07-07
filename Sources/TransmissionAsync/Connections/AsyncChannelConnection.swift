@@ -184,7 +184,7 @@ open class AsyncChannelConnection<C: Channel>: AsyncConnection
 
     public func close() async throws
     {
-        self.channel.close()
+        try await self.channel.close()
     }
 }
 

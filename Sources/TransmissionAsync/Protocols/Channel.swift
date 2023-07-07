@@ -15,5 +15,5 @@ public protocol Channel
     var readable: R { get }
     var writable: W { get }
 
-    func close()
+    func close() async throws
 }
