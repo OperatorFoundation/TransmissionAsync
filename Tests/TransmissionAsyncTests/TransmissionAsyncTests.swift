@@ -53,4 +53,19 @@ final class TransmissionAsyncTests: XCTestCase
 
         XCTAssertEqual(data, result)
     }
+    
+    func testTaskConcurrency() async throws
+    {
+        let listener = try AsyncTcpSocketListener(port: 1234, logger)
+        
+        Task
+        {
+            let serverConnection = try await listener.accept()
+        }
+        
+        Task
+        {
+            print("💥  Or something")
+        }
+    }
 }
