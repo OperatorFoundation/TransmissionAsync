@@ -53,4 +53,27 @@ final class TransmissionAsyncTests: XCTestCase
 
         XCTAssertEqual(data, result)
     }
+    
+    func testTaskConcurrency() async throws
+    {
+        let listener = try AsyncTcpSocketListener(port: 1234, logger)
+        let _ = await withThrowingTaskGroup(of: Bool.self)
+        {
+            group -> Bool in
+            
+            group.addTask
+            {
+                let _ = try await listener.accept()
+                return true
+            }
+            
+            group.addTask
+            {
+                print("💥  Or something")
+                return true
+            }
+            
+            return true
+        }
+    }
 }
