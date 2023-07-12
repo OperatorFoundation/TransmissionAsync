@@ -1,5 +1,5 @@
 //
-//  AsyncTcpClientNetworkConnection.swift
+//  AsyncTcpSocketConnection.swift
 //  TransmissionAsync
 //
 //  Created by Dr. Brandon Wiley on 7/5/23.
