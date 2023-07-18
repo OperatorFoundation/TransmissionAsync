@@ -56,20 +56,20 @@ final class TransmissionAsyncTests: XCTestCase
     
     func testTaskConcurrency() async throws
     {
-        let listener = try AsyncTcpSocketListener(port: 1234, logger)
         let _ = await withThrowingTaskGroup(of: Bool.self)
         {
             group -> Bool in
             
             group.addTask
             {
+                let listener = try AsyncTcpSocketListener(port: 1234, self.logger)
                 let _ = try await listener.accept()
                 return true
             }
             
             group.addTask
             {
-                print("💥  Or something")
+                let _ = try await AsyncTcpSocketConnection("localhost", 1234, self.logger)
                 return true
             }
             
