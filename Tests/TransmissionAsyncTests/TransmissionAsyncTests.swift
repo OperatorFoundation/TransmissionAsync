@@ -76,4 +76,18 @@ final class TransmissionAsyncTests: XCTestCase
             return true
         }
     }
+
+    func testTaskConcurrency2() async throws
+    {
+        Task
+        {
+            let listener = try AsyncTcpSocketListener(port: 1234, self.logger)
+            let _ = try await listener.accept()
+        }
+
+        Task
+        {
+            let _ = try await AsyncTcpSocketConnection("localhost", 1234, self.logger)
+        }
+    }
 }
