@@ -131,4 +131,11 @@ final class TransmissionAsyncTests: XCTestCase
             }
         }
     }
+
+    func testStdio() async throws
+    {
+        let connection = AsyncStdioConnection(logger)
+        let data = try await connection.readSize(4)
+        try await connection.write(data)
+    }
 }

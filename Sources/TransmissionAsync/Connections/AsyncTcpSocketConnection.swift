@@ -78,28 +78,18 @@ public class SocketReadable: Readable
 
     public func read(_ size: Int) async throws -> Data
     {
-        return try await withCheckedThrowingContinuation
+        return try await AsyncAwaitAsynchronizer.async
         {
-            continuation in
-
             var data: Data = Data()
 
-            do
+            while data.count < size
             {
-                while data.count < size
-                {
-                        try self.socket.read(into: &data)
-                }
-
-                straw.write(data)
-
-                let result = try straw.read(size: size)
-                continuation.resume(returning: result)
+                try self.socket.read(into: &data)
             }
-            catch
-            {
-                continuation.resume(throwing: error)
-            }
+
+            self.straw.write(data)
+
+            return try self.straw.read(size: size)
         }
     }
 }
@@ -115,25 +105,14 @@ public class SocketWritable: Writable
 
     public func write(_ data: Data) async throws
     {
-        try await withCheckedThrowingContinuation
+        try await AsyncAwaitAsynchronizer.async
         {
-            continuation in
-
             var dataToWrite = data
 
-            do
+            while dataToWrite.count > 0
             {
-                while dataToWrite.count > 0
-                {
-                    let wrote = try self.socket.write(from: dataToWrite)
-                    dataToWrite = data.dropFirst(wrote)
-                }
-
-                continuation.resume(returning: ())
-            }
-            catch
-            {
-                continuation.resume(throwing: error)
+                let wrote = try self.socket.write(from: dataToWrite)
+                dataToWrite = data.dropFirst(wrote)
             }
         }
     }

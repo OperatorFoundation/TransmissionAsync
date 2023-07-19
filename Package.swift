@@ -12,9 +12,11 @@ let package = Package(
         .library(
             name: "TransmissionAsync",
             targets: ["TransmissionAsync"]),
+        .executable(name: "TransmissionAsyncTester", targets: ["TransmissionAsyncTester"]),
     ],
     dependencies: [
         .package(url: "https://github.com/apple/swift-log.git", from: "1.5.2"),
+
         .package(url: "https://github.com/OperatorFoundation/BlueSocket", branch: "main"),
         .package(url: "https://github.com/OperatorFoundation/Chord", branch: "main"),
         .package(url: "https://github.com/OperatorFoundation/Datable", branch: "main"),
@@ -32,6 +34,14 @@ let package = Package(
                 "Chord",
                 "Datable",
                 "Straw",
+            ]
+        ),
+        .executableTarget(
+            name: "TransmissionAsyncTester",
+            dependencies: [
+                .product(name: "Logging", package: "swift-log"),
+
+                "TransmissionAsync",
             ]
         ),
         .testTarget(
