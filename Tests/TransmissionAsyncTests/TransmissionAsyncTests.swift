@@ -81,13 +81,13 @@ final class TransmissionAsyncTests: XCTestCase
     {
         Task
         {
-            let listener = try AsyncTcpSocketListener(port: 1234, self.logger)
+            let listener = try AsyncTcpSocketListener(port: 1235, self.logger)
             let _ = try await listener.accept()
         }
 
         Task
         {
-            let _ = try await AsyncTcpSocketConnection("localhost", 1234, self.logger)
+            let _ = try await AsyncTcpSocketConnection("localhost", 1235, self.logger)
         }
     }
 }
