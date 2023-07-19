@@ -5,6 +5,7 @@ import Logging
 #endif
 import XCTest
 @testable import TransmissionAsync
+import Chord
 
 final class TransmissionAsyncTests: XCTestCase
 {
@@ -88,6 +89,46 @@ final class TransmissionAsyncTests: XCTestCase
         Task
         {
             let _ = try await AsyncTcpSocketConnection("localhost", 1235, self.logger)
+        }
+    }
+
+    func testTaskConcurrency3() async throws
+    {
+        let queue1 = DispatchQueue(label: "queue1")
+        let queue2 = DispatchQueue(label: "queue2")
+
+        queue1.async
+        {
+            do
+            {
+                let listener = try AsyncTcpSocketListener(port: 1235, self.logger)
+
+                try AsyncAwaitThrowingSynchronizer<Void>.sync
+                {
+                    let _ = try await listener.accept()
+                }
+            }
+            catch
+            {
+                XCTFail()
+                return
+            }
+        }
+
+        queue2.async
+        {
+            do
+            {
+                try AsyncAwaitThrowingSynchronizer<Void>.sync
+                {
+                    let _ = try await AsyncTcpSocketConnection("localhost", 1235, self.logger)
+                }
+            }
+            catch
+            {
+                XCTFail()
+                return
+            }
         }
     }
 }
