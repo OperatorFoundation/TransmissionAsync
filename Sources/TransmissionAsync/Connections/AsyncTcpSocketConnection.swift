@@ -12,6 +12,7 @@ import os.log
 import Logging
 #endif
 
+import Chord
 import Socket
 import Straw
 
@@ -21,19 +22,9 @@ public class AsyncTcpSocketConnection: AsyncChannelConnection<SocketChannel>
     {
         let socket = try Socket.create()
 
-        try await withCheckedThrowingContinuation
+        try await AsyncAwaitAsynchronizer.async
         {
-            continuation in
-
-            do
-            {
-                try socket.connect(to: host, port: Int32(port))
-                continuation.resume(returning: ())
-            }
-            catch
-            {
-                continuation.resume(throwing: error)
-            }
+            try socket.connect(to: host, port: Int32(port))
         }
 
         self.init(socket, logger)

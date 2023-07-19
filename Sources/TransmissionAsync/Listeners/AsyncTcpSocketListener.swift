@@ -12,6 +12,7 @@ import os.log
 import Logging
 #endif
 
+import Chord
 import Socket
 
 public class AsyncTcpSocketListener: AsyncListener
@@ -32,7 +33,10 @@ public class AsyncTcpSocketListener: AsyncListener
 
     public func accept() async throws -> AsyncConnection
     {
-        let socket = try self.listener.acceptClientConnection(invokeDelegate: false)
-        return AsyncTcpSocketConnection(socket, self.logger)
+        return try await AsyncAwaitAsynchronizer.async
+        {
+            let socket = try self.listener.acceptClientConnection(invokeDelegate: false)
+            return AsyncTcpSocketConnection(socket, self.logger)
+        }
     }
 }

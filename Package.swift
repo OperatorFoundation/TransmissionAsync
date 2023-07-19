@@ -26,15 +26,20 @@ let package = Package(
         .target(
             name: "TransmissionAsync",
             dependencies: [
-                "Datable",
-                "Straw",
                 .product(name: "Logging", package: "swift-log"),
                 .product(name: "Socket", package: "BlueSocket"),
+
+                "Chord",
+                "Datable",
+                "Straw",
             ]
         ),
         .testTarget(
             name: "TransmissionAsyncTests",
-            dependencies: ["Chord", "TransmissionAsync"]),
+            dependencies: [
+                "Chord", "TransmissionAsync"
+            ]
+        ),
     ],
     swiftLanguageVersions: [.v5]
 )
