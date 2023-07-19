@@ -64,16 +64,30 @@ public class StdinReadable: Readable
     {
     }
 
+    public func read() async throws -> Data
+    {
+        return await AsyncAwaitAsynchronizer.async
+        {
+            return self.handle.availableData
+        }
+    }
+
     public func read(_ size: Int) async throws -> Data
     {
         return try await AsyncAwaitAsynchronizer.async
         {
-            guard let data = try self.handle.read(upToCount: size) else
+            while self.straw.count < size
             {
-                throw AsyncStdioConnectionError.readFailed
+                guard let data = try self.handle.read(upToCount: size) else
+                {
+                    throw AsyncStdioConnectionError.readFailed
+                }
+
+                self.straw.write(data)
             }
 
-            return data
+            let result = try self.straw.read(size: size)
+            return result
         }
     }
 }

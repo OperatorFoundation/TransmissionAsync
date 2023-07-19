@@ -14,6 +14,9 @@ import Logging
 
 public protocol AsyncConnection
 {
+    // Reads an amount of data decided by magic
+    func read() async throws -> Data
+
     // Reads exactly size bytes
     func readSize(_ size: Int) async throws -> Data
 

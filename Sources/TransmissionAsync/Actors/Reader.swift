@@ -23,6 +23,11 @@ public actor Reader<T: Readable>
         self.logger = logger
     }
 
+    public func read() async throws -> Data
+    {
+        return try await self.reader.read()
+    }
+
     public func read(_ size: Int) async throws -> Data
     {
         return try await self.reader.read(size)

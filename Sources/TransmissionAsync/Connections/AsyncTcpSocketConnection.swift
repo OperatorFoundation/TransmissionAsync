@@ -76,6 +76,16 @@ public class SocketReadable: Readable
         self.socket = socket
     }
 
+    public func read() async throws -> Data
+    {
+        return try await AsyncAwaitAsynchronizer.async
+        {
+            var data: Data = Data()
+            try self.socket.read(into: &data)
+            return data
+        }
+    }
+
     public func read(_ size: Int) async throws -> Data
     {
         return try await AsyncAwaitAsynchronizer.async

@@ -30,6 +30,12 @@ open class AsyncChannelConnection<C: Channel>: AsyncConnection
         self.writer = Writer(channel.writable, logger)
     }
 
+    // Reads an amount of data decided by magic
+    public func read() async throws -> Data
+    {
+        try await self.reader.read()
+    }
+
     // Reads exactly size bytes
     public func readSize(_ size: Int) async throws -> Data
     {
