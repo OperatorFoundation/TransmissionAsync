@@ -60,6 +60,8 @@ open class AsyncChannelConnection<C: Channel>: AsyncConnection
 
     public func readWithLengthPrefix(prefixSizeInBits: Int) async throws -> Data
     {
+        self.logger.debug("AsyncChannelConnection.readWithLengthPrefix(\(prefixSizeInBits))")
+
         let sizeInBytes: Int
 
         switch prefixSizeInBits
@@ -80,6 +82,7 @@ open class AsyncChannelConnection<C: Channel>: AsyncConnection
                 throw AsyncConnectionError.badPrefixSize(prefixSizeInBits)
         }
 
+        self.logger.debug("AsyncChannelConnection.readWithLengthPrefix - reading length bytes)")
         return try await self.reader.read(sizeInBytes)
         {
             lengthBytes in
