@@ -25,6 +25,6 @@ import TransmissionAsync
 
 let logger = Logger(label: "Testing")
 
-let connection = AsyncStdioConnection(logger)
+let connection = AsyncSystemdConnection(logger)
 let data = try await connection.readSize(4)
 try await connection.write(data)
