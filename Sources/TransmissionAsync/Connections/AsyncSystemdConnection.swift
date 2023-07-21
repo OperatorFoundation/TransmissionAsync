@@ -38,7 +38,7 @@ public class SystemdChannel: Channel
     }
 
     let stdin = FileHandleReadable(3)
-    let stdout = FileHandleWritable(4)
+    let stdout = FileHandleWritable(3)
 
     public init()
     {
