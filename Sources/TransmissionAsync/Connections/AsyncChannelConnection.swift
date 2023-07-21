@@ -82,10 +82,12 @@ open class AsyncChannelConnection<C: Channel>: AsyncConnection
                 throw AsyncConnectionError.badPrefixSize(prefixSizeInBits)
         }
 
-        self.logger.debug("AsyncChannelConnection.readWithLengthPrefix - reading length bytes)")
+        self.logger.debug("AsyncChannelConnection.readWithLengthPrefix - reading length bytes")
         return try await self.reader.read(sizeInBytes)
         {
             lengthBytes in
+
+            self.logger.debug("AsyncChannelConnection.readWithLengthPrefix - \(lengthBytes)")
 
             let length: Int
             switch sizeInBytes
@@ -125,6 +127,8 @@ open class AsyncChannelConnection<C: Channel>: AsyncConnection
                 default:
                     throw AsyncConnectionError.badPrefixSize(prefixSizeInBits)
             }
+
+            self.logger.debug("AsyncChannelConnection.readWithLengthPrefix - \(length)")
 
             return length
         }
