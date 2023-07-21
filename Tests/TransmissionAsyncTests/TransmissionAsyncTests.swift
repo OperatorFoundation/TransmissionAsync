@@ -1,19 +1,11 @@
-#if os(macOS) || os(iOS)
-import os.log
-#else
 import Logging
-#endif
 import XCTest
 @testable import TransmissionAsync
 import Chord
 
 final class TransmissionAsyncTests: XCTestCase
 {
-    #if os(macOS)
-    let logger = Logger(subsystem: "TransmissionAsyncTests", category: "Testing")
-    #else
     let logger = Logger(label: "Testing")
-    #endif
 
     func testConnect() async throws
     {
