@@ -10,6 +10,7 @@ import Logging
 
 import Datable
 import Straw
+import SwiftHexTools
 
 open class AsyncChannelConnection<C: Channel>: AsyncConnection
 {
@@ -111,6 +112,7 @@ open class AsyncChannelConnection<C: Channel>: AsyncConnection
                 case 32:
                     guard let tempLength = lengthBytes.maybeNetworkUint32 else
                     {
+                        self.logger.error("bad length prefix for 32 bits \(lengthBytes.count) \(lengthBytes.hex)")
                         throw AsyncConnectionError.badLengthPrefix
                     }
 
