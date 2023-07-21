@@ -91,7 +91,7 @@ open class AsyncChannelConnection<C: Channel>: AsyncConnection
             self.logger.debug("AsyncChannelConnection.readWithLengthPrefix - \(lengthBytes)")
 
             let length: Int
-            switch sizeInBytes
+            switch prefixSizeInBits
             {
                 case 8:
                     guard let tempLength = lengthBytes.uint8 else
