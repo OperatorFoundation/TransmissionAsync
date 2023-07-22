@@ -18,11 +18,14 @@ open class AsyncChannelConnection<C: Channel>: AsyncConnection
     let reader: Reader<C.R>
     let writer: Writer<C.W>
     let logger: Logger
+    let verbose: Bool
 
-    public init(_ channel: C, _ logger: Logger)
+    public init(_ channel: C, _ logger: Logger, verbose: Bool = false)
     {
         self.channel = channel
         self.logger = logger
+        self.verbose = verbose
+
         self.reader = Reader(channel.readable, logger)
         self.writer = Writer(channel.writable, logger)
     }
@@ -61,7 +64,10 @@ open class AsyncChannelConnection<C: Channel>: AsyncConnection
 
     public func readWithLengthPrefix(prefixSizeInBits: Int) async throws -> Data
     {
-        self.logger.debug("AsyncChannelConnection.readWithLengthPrefix(\(prefixSizeInBits))")
+        if self.verbose
+        {
+            self.logger.debug("AsyncChannelConnection.readWithLengthPrefix(\(prefixSizeInBits))")
+        }
 
         let sizeInBytes: Int
 
@@ -83,12 +89,19 @@ open class AsyncChannelConnection<C: Channel>: AsyncConnection
                 throw AsyncConnectionError.badPrefixSize(prefixSizeInBits)
         }
 
-        self.logger.debug("AsyncChannelConnection.readWithLengthPrefix - reading length bytes")
+        if self.verbose
+        {
+            self.logger.debug("AsyncChannelConnection.readWithLengthPrefix - reading length bytes")
+        }
+
         return try await self.reader.read(sizeInBytes)
         {
             lengthBytes in
 
-            self.logger.debug("AsyncChannelConnection.readWithLengthPrefix - \(lengthBytes)")
+            if self.verbose
+            {
+                self.logger.debug("AsyncChannelConnection.readWithLengthPrefix - \(lengthBytes)")
+            }
 
             let length: Int
             switch prefixSizeInBits
@@ -112,7 +125,11 @@ open class AsyncChannelConnection<C: Channel>: AsyncConnection
                 case 32:
                     guard let tempLength = lengthBytes.maybeNetworkUint32 else
                     {
-                        self.logger.error("bad length prefix for 32 bits \(lengthBytes.count) \(lengthBytes.hex)")
+                        if self.verbose
+                        {
+                            self.logger.error("bad length prefix for 32 bits \(lengthBytes.count) \(lengthBytes.hex)")
+                        }
+
                         throw AsyncConnectionError.badLengthPrefix
                     }
 
@@ -130,7 +147,10 @@ open class AsyncChannelConnection<C: Channel>: AsyncConnection
                     throw AsyncConnectionError.badPrefixSize(prefixSizeInBits)
             }
 
-            self.logger.debug("AsyncChannelConnection.readWithLengthPrefix - \(length)")
+            if self.verbose
+            {
+                self.logger.debug("AsyncChannelConnection.readWithLengthPrefix - \(length)")
+            }
 
             return length
         }
