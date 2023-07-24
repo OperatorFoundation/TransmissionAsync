@@ -1,5 +1,5 @@
 //
-//  AsyncStdioConnection.swift
+//  AsyncSystemdConnection.swift
 //
 //
 //  Created by Dr. Brandon Wiley on 7/21/23.
@@ -77,7 +77,7 @@ public class FileHandleReadable: Readable
             {
                 guard let data = try self.handle.read(upToCount: size) else
                 {
-                    throw AsyncStdioConnectionError.readFailed
+                    throw AsyncSystemdConnectionError.readFailed
                 }
 
                 self.straw.write(data)
