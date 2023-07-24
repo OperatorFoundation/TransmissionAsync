@@ -49,7 +49,10 @@ let package = Package(
         .testTarget(
             name: "TransmissionAsyncTests",
             dependencies: [
-                "Chord", "TransmissionAsync"
+                .product(name: "Socket", package: "BlueSocket"),
+
+                "Chord",
+                "TransmissionAsync"
             ]
         ),
     ],

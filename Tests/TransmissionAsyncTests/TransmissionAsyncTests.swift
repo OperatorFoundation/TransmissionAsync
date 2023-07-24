@@ -2,6 +2,7 @@ import Logging
 import XCTest
 @testable import TransmissionAsync
 import Chord
+import Socket
 
 final class TransmissionAsyncTests: XCTestCase
 {
@@ -129,5 +130,69 @@ final class TransmissionAsyncTests: XCTestCase
         let connection = AsyncStdioConnection(logger)
         let data = try await connection.readSize(4)
         try await connection.write(data)
+    }
+
+    func testUdpServer() throws
+    {
+        let read = XCTestExpectation(description: "server read from client")
+        let wrote = XCTestExpectation(description: "client wrote to serfer")
+
+        let correct = "asdf".data
+
+        let host = "127.0.0.1"
+        let port = 4455
+
+        Task
+        {
+            let server = try AsyncUdpSocketMailbox(host: host, port: port)
+
+            let (data, from) = try await server.read()
+            print("read \(data)")
+            print(from.debugDescription)
+            XCTAssert(data == correct)
+
+            read.fulfill()
+        }
+
+        wait(for: [read, wrote], timeout: 60)
+    }
+
+
+    func testUdpClientAndServer() throws
+    {
+        let read = XCTestExpectation(description: "server read from client")
+        let wrote = XCTestExpectation(description: "client wrote to serfer")
+
+        let correct = "asdf".data
+
+        let host = "127.0.0.1"
+        let port = 4455
+
+        let lock = DispatchSemaphore(value: 0)
+
+        Task
+        {
+            let server = try AsyncUdpSocketMailbox(host: "127.0.0.1", port: 4455)
+
+            lock.signal()
+
+            let (data, from) = try await server.read()
+            print("read \(data)")
+            print(from.debugDescription)
+            XCTAssert(data == correct)
+
+            read.fulfill()
+        }
+
+        lock.wait()
+
+        Task
+        {
+            let client = try AsyncUdpSocketMailbox()
+            try await client.write("test", address: Socket.createAddress(for: host, on: Int32(port))!)
+            wrote.fulfill()
+        }
+
+        wait(for: [read, wrote], timeout: 60)
     }
 }
