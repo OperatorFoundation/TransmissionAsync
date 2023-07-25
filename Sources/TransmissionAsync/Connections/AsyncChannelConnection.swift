@@ -26,7 +26,7 @@ open class AsyncChannelConnection<C: Channel>: AsyncConnection
         self.logger = logger
         self.verbose = verbose
 
-        self.reader = Reader(channel.readable, logger)
+        self.reader = Reader(channel.readable, logger, verbose: verbose)
         self.writer = Writer(channel.writable, logger)
     }
 
