@@ -14,7 +14,7 @@ import Straw
 
 public class AsyncTcpSocketConnection: AsyncChannelConnection<SocketChannel>
 {
-    public convenience init(_ host: String, _ port: Int, _ logger: Logger) async throws
+    public convenience init(_ host: String, _ port: Int, _ logger: Logger, verbose: Bool = false) async throws
     {
         let socket = try Socket.create()
 
@@ -23,14 +23,14 @@ public class AsyncTcpSocketConnection: AsyncChannelConnection<SocketChannel>
             try socket.connect(to: host, port: Int32(port))
         }
 
-        self.init(socket, logger)
+        self.init(socket, logger, verbose: verbose)
     }
 
-    public init(_ socket: Socket, _ logger: Logger)
+    public init(_ socket: Socket, _ logger: Logger, verbose: Bool = false)
     {
         let channel = SocketChannel(socket)
 
-        super.init(channel, logger)
+        super.init(channel, logger, verbose: verbose)
     }
 }
 
