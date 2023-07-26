@@ -26,9 +26,7 @@ public actor Writer<T: Writable>
 
     public func write(_ datas: [Data]) async throws
     {
-        for data in datas
-        {
-            try await self.writable.write(data)
-        }
+        let data = datas.reduce(Data(), (+))
+        try await self.writable.write(data)
     }
 }
