@@ -86,14 +86,12 @@ public class SocketReadable: Readable
     {
         return try await AsyncAwaitAsynchronizer.async
         {
-            var data: Data = Data()
-
-            while data.count < size
+            while self.straw.count < size
             {
+                var data: Data = Data()
                 try self.socket.read(into: &data)
+                self.straw.write(data)
             }
-
-            self.straw.write(data)
 
             return try self.straw.read(size: size)
         }
