@@ -33,28 +33,90 @@ public actor Reader<T: Readable>
         return try await self.reader.read(size)
     }
 
-    public func read(_ size: Int, handler: (Data) async throws -> Int) async throws -> Data
+    public func readWithLengthPrefix(_ prefixSizeInBits: Int) async throws -> Data
     {
         if verbose
         {
-            self.logger.trace("Reader.read(\(size), handler)")
+            self.logger.trace("Reader.readWithLengthPrefix(\(prefixSizeInBits))")
         }
 
-        let firstData = try await self.reader.read(size)
+        let sizeInBytes: Int
+
+        switch prefixSizeInBits
+        {
+            case 8:
+                sizeInBytes = 1
+
+            case 16:
+                sizeInBytes = 2
+
+            case 32:
+                sizeInBytes = 4
+
+            case 64:
+                sizeInBytes = 8
+
+            default:
+                throw ReaderError.badPrefixSize(prefixSizeInBits)
+        }
+
+        let lengthBytes = try await self.reader.read(sizeInBytes)
+
+        if self.verbose
+        {
+            self.logger.debug("Reader.readWithLengthPrefix - \(lengthBytes)")
+        }
+
+        let length: Int
+        switch prefixSizeInBits
+        {
+            case 8:
+                guard let tempLength = lengthBytes.uint8 else
+                {
+                    throw ReaderError.badLengthPrefix
+                }
+
+                length = Int(tempLength)
+
+            case 16:
+                guard let tempLength = lengthBytes.maybeNetworkUint16 else
+                {
+                    throw ReaderError.badLengthPrefix
+                }
+
+                length = Int(tempLength)
+
+            case 32:
+                guard let tempLength = lengthBytes.maybeNetworkUint32 else
+                {
+                    if self.verbose
+                    {
+                        self.logger.error("bad length prefix for 32 bits \(lengthBytes.count) \(lengthBytes.hex)")
+                    }
+
+                    throw ReaderError.badLengthPrefix
+                }
+
+                length = Int(tempLength)
+
+            case 64:
+                guard let tempLength = lengthBytes.maybeNetworkUint64 else
+                {
+                    throw ReaderError.badLengthPrefix
+                }
+
+                length = Int(tempLength)
+
+            default:
+                throw ReaderError.badPrefixSize(prefixSizeInBits)
+        }
 
         if verbose
         {
-            self.logger.trace("Reader.read - firstData: \(firstData.hex)")
+            self.logger.trace("Reader.read - length: \(length)")
         }
 
-        let nextSize = try await handler(firstData)
-
-        if verbose
-        {
-            self.logger.trace("Reader.read - nextSize: \(nextSize)")
-        }
-
-        let nextData = try await self.reader.read(nextSize)
+        let nextData = try await self.reader.read(length)
 
         if verbose
         {
@@ -63,4 +125,10 @@ public actor Reader<T: Readable>
 
         return nextData
     }
+}
+
+public enum ReaderError: Error
+{
+    case badPrefixSize(Int)
+    case badLengthPrefix
 }
