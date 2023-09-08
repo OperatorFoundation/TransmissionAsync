@@ -116,7 +116,15 @@ public actor Reader<T: Readable>
             self.logger.trace("Reader.read - length: \(length)")
         }
 
-        let nextData = try await self.reader.read(length)
+        let nextData: Data
+        if length > 0
+        {
+            nextData = try await self.reader.read(length)
+        }
+        else
+        {
+            nextData = Data()
+        }
 
         if verbose
         {
