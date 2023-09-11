@@ -28,7 +28,7 @@ public class AsyncTcpSocketConnection: AsyncChannelConnection<SocketChannel>
 
     public init(_ socket: Socket, _ logger: Logger, verbose: Bool = false)
     {
-        let channel = SocketChannel(socket)
+        let channel = SocketChannel(socket, logger: logger)
 
         super.init(channel, logger, verbose: verbose)
     }
@@ -50,14 +50,17 @@ public class SocketChannel: Channel
     }
 
     let socket: Socket
+    let logger: Logger
 
-    public init(_ socket: Socket)
+    public init(_ socket: Socket, logger: Logger)
     {
         self.socket = socket
+        self.logger = logger
     }
 
     public func close()
     {
+        self.logger.info("SocketChannel.close was call explicitly")
         self.socket.close()
     }
 }
