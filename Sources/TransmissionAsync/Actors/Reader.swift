@@ -42,7 +42,7 @@ public actor Reader<T: Readable>
     {
         if verbose
         {
-            self.logger.trace("Reader.readWithLengthPrefix(\(prefixSizeInBits))")
+            self.logger.trace("Reader[\(self.reader)].readWithLengthPrefix(\(prefixSizeInBits))")
         }
 
         let sizeInBytes: Int
