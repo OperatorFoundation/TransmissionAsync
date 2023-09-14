@@ -100,9 +100,9 @@ public class FileHandleWritable: Writable
 
     public func write(_ data: Data) async throws
     {
-        await AsyncAwaitAsynchronizer.async
+        try await AsyncAwaitAsynchronizer.async
         {
-            self.handle.write(data)
+            try self.handle.write(contentsOf: data)
         }
     }
 }
