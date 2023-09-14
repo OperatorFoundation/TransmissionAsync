@@ -71,6 +71,11 @@ public class FileHandleReadable: Readable
 
     public func read(_ size: Int) async throws -> Data
     {
+        if size == 0
+        {
+            return Data()
+        }
+
         return try await AsyncAwaitAsynchronizer.async
         {
             while self.straw.count < size

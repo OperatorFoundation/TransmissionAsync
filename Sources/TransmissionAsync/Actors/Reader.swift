@@ -30,6 +30,11 @@ public actor Reader<T: Readable>
 
     public func read(_ size: Int) async throws -> Data
     {
+        if size == 0
+        {
+            return Data()
+        }
+
         return try await self.reader.read(size)
     }
 
@@ -64,7 +69,7 @@ public actor Reader<T: Readable>
 
         if self.verbose
         {
-            self.logger.debug("Reader.readWithLengthPrefix - \(lengthBytes.hex) \(prefixSizeInBits)")
+            self.logger.debug("Reader.readWithLengthPrefix - \(lengthBytes.count) \(lengthBytes.hex) \(prefixSizeInBits)")
         }
 
         let length: Int

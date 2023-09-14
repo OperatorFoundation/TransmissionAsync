@@ -39,12 +39,22 @@ open class AsyncChannelConnection<C: Channel>: AsyncConnection
     // Reads exactly size bytes
     public func readSize(_ size: Int) async throws -> Data
     {
-        try await self.reader.read(size)
+        if size == 0
+        {
+            return Data()
+        }
+
+        return try await self.reader.read(size)
     }
 
     // reads up to maxSize bytes
     public func readMaxSize(_ maxSize: Int) async throws -> Data
     {
+        if maxSize == 0
+        {
+            return Data()
+        }
+
         let straw: Straw = Straw()
         while straw.count < maxSize
         {
