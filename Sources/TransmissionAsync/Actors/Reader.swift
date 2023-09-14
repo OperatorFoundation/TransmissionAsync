@@ -64,7 +64,7 @@ public actor Reader<T: Readable>
 
         if self.verbose
         {
-            self.logger.debug("Reader.readWithLengthPrefix - \(lengthBytes)")
+            self.logger.debug("Reader.readWithLengthPrefix - \(lengthBytes.hex) \(prefixSizeInBits)")
         }
 
         let length: Int
