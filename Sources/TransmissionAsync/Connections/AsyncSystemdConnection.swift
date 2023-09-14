@@ -14,11 +14,11 @@ import Straw
 
 public class AsyncSystemdConnection: AsyncChannelConnection<SystemdChannel>
 {
-    public init(_ logger: Logger)
+    public init(_ logger: Logger, verbose: Bool = false)
     {
         let channel = SystemdChannel()
 
-        super.init(channel, logger)
+        super.init(channel, logger, verbose: verbose)
     }
 }
 
