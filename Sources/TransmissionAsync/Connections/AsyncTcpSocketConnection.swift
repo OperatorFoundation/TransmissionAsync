@@ -77,6 +77,7 @@ public class SocketReadable: Readable
 
     public func read() async throws -> Data
     {
+        print("SocketReadable.read()")
         return try await AsyncAwaitAsynchronizer.async
         {
             var data: Data = Data()
@@ -87,6 +88,7 @@ public class SocketReadable: Readable
 
     public func read(_ size: Int) async throws -> Data
     {
+        print("SocketReadable.read(size:)")
         return try await AsyncAwaitAsynchronizer.async
         {
             while self.straw.count < size
