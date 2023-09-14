@@ -81,7 +81,11 @@ public class SocketReadable: Readable
         return try await AsyncAwaitAsynchronizer.async
         {
             var data: Data = Data()
+
+            print("actual socket will be read... \(self.socket)")
             try self.socket.read(into: &data)
+            print("actual socket was read. \(self.socket)")
+
             return data
         }
     }
