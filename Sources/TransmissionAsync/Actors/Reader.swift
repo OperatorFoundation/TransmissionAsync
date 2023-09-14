@@ -65,6 +65,11 @@ public actor Reader<T: Readable>
                 throw ReaderError.badPrefixSize(prefixSizeInBits)
         }
 
+        if verbose
+        {
+            self.logger.trace("\(self.reader).read(\(sizeInBytes))")
+        }
+
         let lengthBytes = try await self.reader.read(sizeInBytes)
 
         if self.verbose

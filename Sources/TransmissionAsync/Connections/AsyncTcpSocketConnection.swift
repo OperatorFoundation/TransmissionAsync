@@ -60,7 +60,7 @@ public class SocketChannel: Channel
 
     public func close()
     {
-        self.logger.info("SocketChannel.close was call explicitly")
+        self.logger.info("SocketChannel.close was called explicitly")
         self.socket.close()
     }
 }
@@ -88,7 +88,7 @@ public class SocketReadable: Readable
 
     public func read(_ size: Int) async throws -> Data
     {
-        print("SocketReadable.read(size:)")
+        print("SocketReadable.read(size: \(size))")
 
         if size == 0
         {
@@ -100,7 +100,11 @@ public class SocketReadable: Readable
             while self.straw.count < size
             {
                 var data: Data = Data()
+
+                print("actual socket will be read... \(self.socket)")
                 try self.socket.read(into: &data)
+                print("actual socket was read. \(self.socket)")
+
                 self.straw.write(data)
             }
 
