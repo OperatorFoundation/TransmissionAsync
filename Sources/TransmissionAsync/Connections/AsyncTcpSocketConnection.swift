@@ -63,7 +63,7 @@ public class SocketChannel: Channel
 
     public func close()
     {
-        self.logger.info("SocketChannel.close was called explicitly")
+        self.logger.info("SocketChannel.close() was called explicitly")
         self.socket.close()
     }
 }
@@ -83,15 +83,11 @@ public class SocketReadable: Readable
 
     public func read() async throws -> Data
     {
-        self.logger.trace("SocketReadable.read()")
-        print("SocketReadable.read()")
         return try await AsyncAwaitAsynchronizer.async
         {
             var data: Data = Data()
 
-            print("actual socket will be read... \(self.socket)")
             try self.socket.read(into: &data)
-            print("actual socket was read. \(self.socket)")
 
             return data
         }
@@ -101,41 +97,24 @@ public class SocketReadable: Readable
     {
         try self.socket.setBlocking(mode: true)
 
-        self.logger.trace("SocketReadable.read(size:\(size))")
-        print("SocketReadable.read(size: \(size))")
-
         if size == 0
         {
             return Data()
         }
 
-        self.logger.trace("entering async")
         return try await AsyncAwaitAsynchronizer.async
         {
-            self.logger.trace("entered async")
-
-            self.logger.trace("starting loop \(self.straw.count) \(size)")
             while self.straw.count < size
             {
-                self.logger.trace("inside loop \(self.straw.count) \(size)")
-
                 var data: Data = Data()
 
-                print("actual socket will be read... \(self.socket)")
                 try self.socket.read(into: &data)
-                print("actual socket was read. \(self.socket)")
 
                 self.straw.write(data)
-
-                self.logger.trace("end of loop \(self.straw.count) \(size)")
             }
 
-            self.logger.trace("finished loop \(self.straw.count) \(size)")
-
-            self.logger.trace("setting nonblocking to false")
             try self.socket.setBlocking(mode: false)
 
-            self.logger.trace("reading from straw \(self.straw) \(self.straw.count) \(size)")
             return try self.straw.read(size: size)
         }
     }
