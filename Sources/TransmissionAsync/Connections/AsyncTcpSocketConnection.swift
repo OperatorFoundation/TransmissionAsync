@@ -72,12 +72,13 @@ public class SocketReadable: Readable
 {
     let socket: Socket
     let logger: Logger
-    let straw: UnsafeStraw = UnsafeStraw()
+    let straw: UnsafeStraw
 
     public init(_ socket: Socket, logger: Logger)
     {
         self.socket = socket
         self.logger = logger
+        self.straw = UnsafeStraw(logger)
     }
 
     public func read() async throws -> Data
