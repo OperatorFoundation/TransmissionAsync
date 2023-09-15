@@ -98,6 +98,8 @@ public class SocketReadable: Readable
 
     public func read(_ size: Int) async throws -> Data
     {
+        try self.socket.setBlocking(mode: true)
+
         self.logger.trace("SocketReadable.read(size:\(size))")
         print("SocketReadable.read(size: \(size))")
 
@@ -126,6 +128,8 @@ public class SocketReadable: Readable
 
                 self.logger.trace("end of loop \(self.straw.count) \(size)")
             }
+
+            try self.socket.setBlocking(mode: false)
 
             return try self.straw.read(size: size)
         }
