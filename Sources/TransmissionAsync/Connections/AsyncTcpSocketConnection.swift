@@ -41,7 +41,7 @@ public class SocketChannel: Channel
 
     public var readable: SocketReadable
     {
-        return SocketReadable(self.socket)
+        return SocketReadable(self.socket, logger: self.logger)
     }
 
     public var writable: SocketWritable
@@ -68,15 +68,18 @@ public class SocketChannel: Channel
 public class SocketReadable: Readable
 {
     let socket: Socket
+    let logger: Logger
     let straw: Straw = Straw()
 
-    public init(_ socket: Socket)
+    public init(_ socket: Socket, logger: Logger)
     {
         self.socket = socket
+        self.logger = logger
     }
 
     public func read() async throws -> Data
     {
+        self.logger.trace("SocketReadable.read()")
         print("SocketReadable.read()")
         return try await AsyncAwaitAsynchronizer.async
         {
@@ -92,6 +95,7 @@ public class SocketReadable: Readable
 
     public func read(_ size: Int) async throws -> Data
     {
+        self.logger.trace("SocketReadable.read(size:\(size))")
         print("SocketReadable.read(size: \(size))")
 
         if size == 0
@@ -99,10 +103,16 @@ public class SocketReadable: Readable
             return Data()
         }
 
+        self.logger.trace("entering async")
         return try await AsyncAwaitAsynchronizer.async
         {
+            self.logger.trace("entered async")
+
+            self.logger.trace("starting loop \(self.straw.count) \(size)")
             while self.straw.count < size
             {
+                self.logger.trace("inside loop \(self.straw.count) \(size)")
+
                 var data: Data = Data()
 
                 print("actual socket will be read... \(self.socket)")
@@ -110,6 +120,8 @@ public class SocketReadable: Readable
                 print("actual socket was read. \(self.socket)")
 
                 self.straw.write(data)
+
+                self.logger.trace("end of loop \(self.straw.count) \(size)")
             }
 
             return try self.straw.read(size: size)
