@@ -18,6 +18,8 @@ public class AsyncTcpSocketConnection: AsyncChannelConnection<SocketChannel>
     {
         let socket = try Socket.create()
         try socket.setBlocking(mode: false)
+        try socket.setReadTimeout(value: 1000) // FIXME - find out what these units are
+        try socket.setWriteTimeout(value: 1000)
 
         try await AsyncAwaitAsynchronizer.async
         {
