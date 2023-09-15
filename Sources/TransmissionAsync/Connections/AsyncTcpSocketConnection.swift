@@ -134,7 +134,7 @@ public class SocketReadable: Readable
             self.logger.trace("setting nonblocking to false")
             try self.socket.setBlocking(mode: false)
 
-            self.logger.trace("reading from straw \(self.straw.count) \(size)")
+            self.logger.trace("reading from straw \(self.straw) \(self.straw.count) \(size)")
             return try self.straw.read(size: size)
         }
     }
