@@ -72,7 +72,7 @@ public class SocketReadable: Readable
 {
     let socket: Socket
     let logger: Logger
-    let straw: Straw = Straw()
+    let straw: UnsafeStraw = UnsafeStraw()
 
     public init(_ socket: Socket, logger: Logger)
     {
@@ -129,8 +129,12 @@ public class SocketReadable: Readable
                 self.logger.trace("end of loop \(self.straw.count) \(size)")
             }
 
+            self.logger.trace("finished loop \(self.straw.count) \(size)")
+
+            self.logger.trace("setting nonblocking to false")
             try self.socket.setBlocking(mode: false)
 
+            self.logger.trace("reading from straw \(self.straw.count) \(size)")
             return try self.straw.read(size: size)
         }
     }
