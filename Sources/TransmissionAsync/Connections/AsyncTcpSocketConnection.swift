@@ -17,6 +17,7 @@ public class AsyncTcpSocketConnection: AsyncChannelConnection<SocketChannel>
     public convenience init(_ host: String, _ port: Int, _ logger: Logger, verbose: Bool = false) async throws
     {
         let socket = try Socket.create()
+        try socket.setBlocking(mode: false)
 
         try await AsyncAwaitAsynchronizer.async
         {
