@@ -78,7 +78,7 @@ public class SocketReadable: Readable
     {
         self.socket = socket
         self.logger = logger
-        self.straw = UnsafeStraw(logger)
+        self.straw = UnsafeStraw()
     }
 
     public func read() async throws -> Data
