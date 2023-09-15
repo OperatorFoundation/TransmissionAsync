@@ -18,12 +18,12 @@ public class AsyncTcpSocketConnection: AsyncChannelConnection<SocketChannel>
     {
         let socket = try Socket.create()
         try socket.setBlocking(mode: false)
-        try socket.setReadTimeout(value: 1000) // FIXME - find out what these units are
-        try socket.setWriteTimeout(value: 1000)
+        try socket.setReadTimeout(value: 1 * 1000) // 1 second in milliseconds
+        try socket.setWriteTimeout(value: 1 * 1000) // 1 seconds in milliseconds
 
         try await AsyncAwaitAsynchronizer.async
         {
-            try socket.connect(to: host, port: Int32(port))
+            try socket.connect(to: host, port: Int32(port), timeout: 30 * 1000) // 30 seconds in milliseconds
         }
 
         self.init(socket, logger, verbose: verbose)
