@@ -118,6 +118,45 @@ public class SocketReadable: Readable
             return try self.straw.read(size: size)
         }
     }
+
+    public func readNonblocking(_ size: Int) async throws -> Data
+    {
+        if size == 0
+        {
+            return Data()
+        }
+
+        return try await AsyncAwaitAsynchronizer.async
+        {
+            var firstRead: Bool = true
+            while self.straw.count < size
+            {
+                var data: Data = Data()
+
+                try self.socket.read(into: &data)
+
+                if firstRead, data.isEmpty
+                {
+                    // In non-blocking mode, we can return an empty Data.
+                    return data
+                }
+                else
+                {
+                    // Once we have read at least 1 byte, we can no longer do non-blocking mode.
+                    // This is because if we return early, the data will be lost.
+                    // We can't just return a short Data because that violates the contract of read(size:).
+                    firstRead = false
+                    try self.socket.setBlocking(mode: true)
+                }
+
+                self.straw.write(data)
+            }
+
+            try self.socket.setBlocking(mode: false)
+
+            return try self.straw.read(size: size)
+        }
+    }
 }
 
 public class SocketWritable: Writable
@@ -142,4 +181,9 @@ public class SocketWritable: Writable
             }
         }
     }
+}
+
+public enum AsyncTcpSocketConnectionError: Error
+{
+    case unimplemented
 }

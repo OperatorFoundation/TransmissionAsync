@@ -45,4 +45,5 @@ public class AsyncUdpSocketMailbox: AsyncMailbox
 public enum AsyncUdpSocketMailboxError: Error
 {
     case badReadCount(Int, Int) // actual, expected
+    case unimplemented
 }

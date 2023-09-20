@@ -41,7 +41,7 @@ public actor Writer<T: Writable>
                 let length8 = UInt8(length)
                 guard let lengthData = length8.maybeNetworkData else
                 {
-                    throw AsyncConnectionError.badLengthPrefix
+                    throw WriterError.badLengthPrefix
                 }
 
                 lengthBytes = lengthData
@@ -49,7 +49,7 @@ public actor Writer<T: Writable>
                 let length16 = UInt16(length)
                 guard let lengthData = length16.maybeNetworkData else
                 {
-                    throw AsyncConnectionError.badLengthPrefix
+                    throw WriterError.badLengthPrefix
                 }
 
                 lengthBytes = lengthData
@@ -57,7 +57,7 @@ public actor Writer<T: Writable>
                 let length32 = UInt32(length)
                 guard let lengthData = length32.maybeNetworkData else
                 {
-                    throw AsyncConnectionError.badLengthPrefix
+                    throw WriterError.badLengthPrefix
                 }
 
                 lengthBytes = lengthData
@@ -65,16 +65,20 @@ public actor Writer<T: Writable>
                 let length64 = UInt64(length)
                 guard let lengthData = length64.maybeNetworkData else
                 {
-                    throw AsyncConnectionError.badLengthPrefix
+                    throw WriterError.badLengthPrefix
                 }
 
                 lengthBytes = lengthData
 
             default:
-                throw AsyncConnectionError.badLengthPrefix
+                throw WriterError.badLengthPrefix
         }
 
         try await self.writable.write(lengthBytes + data)
     }
+}
 
+public enum WriterError: Error
+{
+    case badLengthPrefix
 }

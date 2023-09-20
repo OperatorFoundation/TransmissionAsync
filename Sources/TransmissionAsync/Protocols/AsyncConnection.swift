@@ -21,6 +21,8 @@ public protocol AsyncConnection
 
     func readWithLengthPrefix(prefixSizeInBits: Int) async throws -> Data
 
+    func readWithLengthPrefix(prefixSizeInBits: Int, timeoutMilliseconds: Int) async throws -> Data
+
     func writeString(string: String) async throws
 
     func write(_ data: Data) async throws

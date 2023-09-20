@@ -87,6 +87,16 @@ open class AsyncChannelConnection<C: Channel>: AsyncConnection
         return try await self.reader.readWithLengthPrefix(prefixSizeInBits)
     }
 
+    public func readWithLengthPrefix(prefixSizeInBits: Int, timeoutMilliseconds: Int) async throws -> Data
+    {
+        if self.verbose
+        {
+            self.logger.debug("AsyncChannelConnection.readWithLengthPrefix(size: \(prefixSizeInBits), timeoutMilliseconds: \(timeoutMilliseconds))")
+        }
+
+        return try await self.reader.readWithLengthPrefixNonblocking(prefixSizeInBits)
+    }
+
     public func writeString(string: String) async throws
     {
         try await self.write(string.data)
@@ -108,8 +118,9 @@ open class AsyncChannelConnection<C: Channel>: AsyncConnection
     }
 }
 
-public enum AsyncConnectionError: Error
+public enum AsyncChannelConnectionError: Error
 {
     case badPrefixSize(Int)
     case badLengthPrefix
+    case unimplemented
 }

@@ -92,6 +92,11 @@ public class FileHandleReadable: Readable
             return result
         }
     }
+
+    public func readNonblocking(_ size: Int) async throws -> Data
+    {
+        throw AsyncSystemdConnectionError.unimplemented
+    }
 }
 
 public class FileHandleWritable: Writable
@@ -115,4 +120,5 @@ public class FileHandleWritable: Writable
 public enum AsyncSystemdConnectionError: Error
 {
     case readFailed
+    case unimplemented
 }

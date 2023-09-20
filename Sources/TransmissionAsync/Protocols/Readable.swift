@@ -11,4 +11,5 @@ public protocol Readable
 {
     func read() async throws -> Data
     func read(_ size: Int) async throws -> Data
+    func readNonblocking(_ size: Int) async throws -> Data
 }

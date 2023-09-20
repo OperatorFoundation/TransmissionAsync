@@ -91,6 +91,11 @@ public class StdinReadable: Readable
             return result
         }
     }
+
+    public func readNonblocking(_ size: Int) async throws -> Data
+    {
+        throw AsyncStdioConnectionError.unimplemented
+    }
 }
 
 public class StdoutWritable: Writable
@@ -113,4 +118,5 @@ public class StdoutWritable: Writable
 public enum AsyncStdioConnectionError: Error
 {
     case readFailed
+    case unimplemented
 }
