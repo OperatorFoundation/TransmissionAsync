@@ -87,11 +87,11 @@ open class AsyncChannelConnection<C: Channel>: AsyncConnection
         return try await self.reader.readWithLengthPrefix(prefixSizeInBits)
     }
 
-    public func readWithLengthPrefix(prefixSizeInBits: Int, timeoutMilliseconds: Int) async throws -> Data
+    public func readWithLengthPrefixNonblocking(prefixSizeInBits: Int) async throws -> Data
     {
         if self.verbose
         {
-            self.logger.debug("AsyncChannelConnection.readWithLengthPrefix(size: \(prefixSizeInBits), timeoutMilliseconds: \(timeoutMilliseconds))")
+            self.logger.debug("AsyncChannelConnection.readWithLengthPrefix(size: \(prefixSizeInBits))")
         }
 
         return try await self.reader.readWithLengthPrefixNonblocking(prefixSizeInBits)
