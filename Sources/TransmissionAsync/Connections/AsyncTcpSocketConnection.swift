@@ -137,8 +137,8 @@ public class SocketReadable: Readable
 
                 if firstRead, data.isEmpty
                 {
-                    // In non-blocking mode, we can return an empty Data.
-                    return data
+                    // In non-blocking mode, we can throw because there was no data.
+                    throw AsyncTcpSocketConnectionError.noData
                 }
                 else
                 {
@@ -186,4 +186,5 @@ public class SocketWritable: Writable
 public enum AsyncTcpSocketConnectionError: Error
 {
     case unimplemented
+    case noData
 }
