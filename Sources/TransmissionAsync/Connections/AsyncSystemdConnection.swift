@@ -95,7 +95,47 @@ public class FileHandleReadable: Readable
 
     public func readNonblocking(_ size: Int) async throws -> Data
     {
-        throw AsyncSystemdConnectionError.unimplemented
+        if size == 0
+        {
+            return Data()
+        }
+
+        if self.straw.count >= size
+        {
+            return try self.straw.read(size: size)
+        }
+
+        let availableData = self.handle.availableData
+
+        if availableData.count == 0
+        {
+            throw AsyncSystemdConnectionError.noData
+        }
+        else
+        {
+            self.straw.write(availableData)
+
+            if self.straw.count >= size
+            {
+                return try self.straw.read(size: size)
+            }
+
+            return try await AsyncAwaitAsynchronizer.async
+            {
+                while self.straw.count < size
+                {
+                    guard let data = try self.handle.read(upToCount: size) else
+                    {
+                        throw AsyncSystemdConnectionError.readFailed
+                    }
+
+                    self.straw.write(data)
+                }
+
+                let result = try self.straw.read(size: size)
+                return result
+            }
+        }
     }
 }
 
@@ -120,5 +160,5 @@ public class FileHandleWritable: Writable
 public enum AsyncSystemdConnectionError: Error
 {
     case readFailed
-    case unimplemented
+    case noData
 }
