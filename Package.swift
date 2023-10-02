@@ -17,11 +17,11 @@ let package = Package(
     dependencies: [
         .package(url: "https://github.com/apple/swift-log.git", from: "1.5.2"),
 
-        .package(url: "https://github.com/OperatorFoundation/BlueSocket", branch: "main"),
-        .package(url: "https://github.com/OperatorFoundation/Chord", branch: "main"),
-        .package(url: "https://github.com/OperatorFoundation/Datable", branch: "main"),
-        .package(url: "https://github.com/OperatorFoundation/Straw", branch: "main"),
-        .package(url: "https://github.com/OperatorFoundation/SwiftHexTools", branch: "main"),
+        .package(url: "https://github.com/OperatorFoundation/BlueSocket", branch: "release"),
+        .package(url: "https://github.com/OperatorFoundation/Chord", branch: "release"),
+        .package(url: "https://github.com/OperatorFoundation/Datable", from: "4.0.0"),
+        .package(url: "https://github.com/OperatorFoundation/Straw", branch: "release"),
+        .package(url: "https://github.com/OperatorFoundation/SwiftHexTools", branch: "1.2.6"),
     ],
     targets: [
         // Targets are the basic building blocks of a package. A target can define a module or a test suite.
