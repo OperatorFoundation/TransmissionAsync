@@ -73,25 +73,23 @@ final class TransmissionAsyncTests: XCTestCase
 
     func testTaskConcurrency2() async throws
     {
-        let task1Expectation = expectation(description: "Task1")
-        let task2Expectation = expectation(description: "Task2")
         
-        Task
+        let task1Complete = Task
         {
-            print("Task 1")
+            
             let listener = try AsyncTcpSocketListener(port: 1235, self.logger)
             let _ = try await listener.accept()
-            task1Expectation.fulfill()
+            print("Task 1")
         }
 
-        Task
+        let task2Complete = Task
         {
-            print("Task 2")
             let _ = try await AsyncTcpSocketConnection("localhost", 1235, self.logger)
-            task2Expectation.fulfill()
+            print("Task 2")
         }
         
-//        await fulfillment(of: [task1Expectation, task2Expectation], timeout: 5) // 5 second timeout
+        let _ = try await task1Complete.value
+        let _ = try await task2Complete.value
     }
 
     func testTaskConcurrency3() async throws
