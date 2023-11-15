@@ -10,4 +10,5 @@ import Foundation
 public protocol AsyncListener
 {
     func accept() async throws -> AsyncConnection
+    func close() async throws
 }
