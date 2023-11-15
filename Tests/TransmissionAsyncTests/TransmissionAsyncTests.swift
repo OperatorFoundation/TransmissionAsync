@@ -71,7 +71,7 @@ final class TransmissionAsyncTests: XCTestCase
         }
     }
 
-    func testTaskConcurrency2() async throws
+    func testTaskConcurrency2a() async throws
     {
         
         let task1Complete = Task
@@ -86,6 +86,33 @@ final class TransmissionAsyncTests: XCTestCase
         {
             let _ = try await AsyncTcpSocketConnection("localhost", 1235, self.logger)
             print("Task 2")
+        }
+        
+        let _ = try await task1Complete.value
+        let _ = try await task2Complete.value
+    }
+    
+    func testTaskConcurrency2b() async throws
+    {
+        
+        let task1Complete = Task
+        {
+            
+            let listener = try AsyncTcpSocketListener(port: 1235, self.logger)
+            let clientConnection = try await listener.accept()
+            let readResult = try await clientConnection.readSize(18)
+            XCTAssertNotNil(readResult)
+            print("Received a message from a client: \(readResult.string)")
+            try await clientConnection.writeString(string: "Server says hello.")
+        }
+
+        let task2Complete = Task
+        {
+            let connection = try await AsyncTcpSocketConnection("localhost", 1235, self.logger)
+            try await connection.writeString(string: "Client says hello.")
+            let readResult = try await connection.readSize(18)
+            XCTAssertNotNil(readResult)
+            print("Received a message from the server: \(readResult.string)")
         }
         
         let _ = try await task1Complete.value
