@@ -20,7 +20,7 @@ open class AsyncChannelConnection<C: Channel>: AsyncConnection
     let logger: Logger
     let verbose: Bool
 
-    let straw: Straw = Straw()
+    let straw: UnsafeStraw = UnsafeStraw()
 
     public init(_ channel: C, _ logger: Logger, verbose: Bool = false)
     {
