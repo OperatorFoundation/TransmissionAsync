@@ -48,6 +48,7 @@ open class AsyncChannelConnection<C: Channel>: AsyncConnection
     // Reads exactly size bytes
     public func readSize(_ size: Int) async throws -> Data
     {
+        print("AsyncChannelConnection.readSize")
         print("AsyncChannelConnection.readSize(\(size)) - straw: \(self.straw.count)")
 
         if size == 0
