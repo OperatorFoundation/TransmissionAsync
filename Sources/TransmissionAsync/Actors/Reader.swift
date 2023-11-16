@@ -30,11 +30,14 @@ public actor Reader<T: Readable>
 
     public func read(_ size: Int) async throws -> Data
     {
+        print("Reader.read(\(size))")
+
         if size == 0
         {
             return Data()
         }
 
+        print("Reader.read(\(size)) - calling self.reader.read(\(size))")
         return try await self.reader.read(size)
     }
 

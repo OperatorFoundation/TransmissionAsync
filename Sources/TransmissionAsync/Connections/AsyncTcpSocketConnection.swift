@@ -95,6 +95,8 @@ public class SocketReadable: Readable
 
     public func read(_ size: Int) async throws -> Data
     {
+        print("SocketReadable.read(\(size))")
+
         try self.socket.setBlocking(mode: true)
 
         if size == 0
@@ -102,12 +104,16 @@ public class SocketReadable: Readable
             return Data()
         }
 
+        print("SocketReadable.read(\(size)) - starting Asynchronizer")
         return try await AsyncAwaitAsynchronizer.async
         {
+            print("SocketReadable.read(\(size)) - entered Asynchronizer")
+
             while self.straw.count < size
             {
                 var data: Data = Data()
 
+                print("SocketReadable.read(\(size)) - calling self.socket.read")
                 try self.socket.read(into: &data)
 
                 self.straw.write(data)
