@@ -47,7 +47,7 @@ open class AsyncChannelConnection<C: Channel>: AsyncConnection
         return try await self.reader.read(size)
     }
 
-    // reads up to maxSize bytes
+    /// Reads up to maxSize bytes
     public func readMaxSize(_ maxSize: Int) async throws -> Data
     {
         if maxSize == 0
@@ -60,16 +60,25 @@ open class AsyncChannelConnection<C: Channel>: AsyncConnection
         {
             do
             {
-                let data = try await self.reader.read(1)
+                let data = try await self.reader.read()
+                
+                // If we get zero bytes back
+                // We may have timed out
+                // Return whatever we have in the straw
+                guard data.count > 0 else
+                {
+                    return try straw.read(maxSize: maxSize)
+                }
+                
                 straw.write(data)
             }
             catch
             {
-                return try straw.read()
+                return try straw.read(maxSize: maxSize)
             }
         }
 
-        return try straw.read()
+        return try straw.read(maxSize: maxSize)
     }
 
     public func readWithLengthPrefix(prefixSizeInBits: Int) async throws -> Data
