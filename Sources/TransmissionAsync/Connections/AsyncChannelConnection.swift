@@ -20,6 +20,8 @@ open class AsyncChannelConnection<C: Channel>: AsyncConnection
     let logger: Logger
     let verbose: Bool
 
+    let straw: Straw = Straw()
+
     public init(_ channel: C, _ logger: Logger, verbose: Bool = false)
     {
         self.channel = channel
@@ -33,7 +35,14 @@ open class AsyncChannelConnection<C: Channel>: AsyncConnection
     // Reads an amount of data decided by magic
     public func read() async throws -> Data
     {
-        try await self.reader.read()
+        if self.straw.isEmpty
+        {
+            return try await self.reader.read()
+        }
+        else
+        {
+            return try self.straw.read()
+        }
     }
 
     // Reads exactly size bytes
@@ -44,7 +53,16 @@ open class AsyncChannelConnection<C: Channel>: AsyncConnection
             return Data()
         }
 
-        return try await self.reader.read(size)
+        if size <= self.straw.count
+        {
+            return try self.straw.read(size: size)
+        }
+        else
+        {
+            let data = try await self.reader.read(size - self.straw.count)
+            self.straw.write(data)
+            return try self.straw.read(size: size)
+        }
     }
 
     /// Reads up to maxSize bytes
@@ -55,7 +73,6 @@ open class AsyncChannelConnection<C: Channel>: AsyncConnection
             return Data()
         }
 
-        let straw: Straw = Straw()
         while straw.count < maxSize
         {
             do
@@ -99,21 +116,32 @@ open class AsyncChannelConnection<C: Channel>: AsyncConnection
             return Data()
         }
 
-        let straw: Straw = Straw()
+        let minData = try await self.reader.read(minSize)
+        self.straw.write(minData)
+
         while straw.count < maxSize
         {
             do
             {
-                let data = try await self.reader.read(1)
+                let data = try await self.reader.read()
+
+                // If we get zero bytes back
+                // We may have timed out
+                // Return whatever we have in the straw
+                guard data.count > 0 else
+                {
+                    return try straw.read(maxSize: maxSize)
+                }
+
                 straw.write(data)
             }
             catch
             {
-                return try straw.read()
+                return try straw.read(maxSize: maxSize)
             }
         }
 
-        return try straw.read()
+        return try straw.read(maxSize: maxSize)
     }
 
     public func readWithLengthPrefix(prefixSizeInBits: Int) async throws -> Data
