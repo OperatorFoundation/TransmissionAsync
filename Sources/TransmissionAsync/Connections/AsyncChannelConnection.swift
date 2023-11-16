@@ -72,6 +72,41 @@ open class AsyncChannelConnection<C: Channel>: AsyncConnection
         return try straw.read()
     }
 
+    // reads at least minSize bytes and up to maxSize bytes
+    public func readMinMaxSize(_ minSize: Int, _ maxSize: Int) async throws -> Data
+    {
+        guard maxSize >= minSize else
+        {
+            throw AsyncChannelConnectionError.badArguments
+        }
+
+        guard minSize > 0 else
+        {
+            throw AsyncChannelConnectionError.badArguments
+        }
+
+        if maxSize == 0
+        {
+            return Data()
+        }
+
+        let straw: Straw = Straw()
+        while straw.count < maxSize
+        {
+            do
+            {
+                let data = try await self.reader.read(1)
+                straw.write(data)
+            }
+            catch
+            {
+                return try straw.read()
+            }
+        }
+
+        return try straw.read()
+    }
+
     public func readWithLengthPrefix(prefixSizeInBits: Int) async throws -> Data
     {
         if self.verbose
@@ -123,4 +158,5 @@ public enum AsyncChannelConnectionError: Error
     case badPrefixSize(Int)
     case badLengthPrefix
     case unimplemented
+    case badArguments
 }
