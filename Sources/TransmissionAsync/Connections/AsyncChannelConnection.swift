@@ -93,6 +93,8 @@ open class AsyncChannelConnection<C: Channel>: AsyncConnection
             {
                 return try straw.read(maxSize: maxSize)
             }
+
+            await Task.yield()
         }
 
         return try straw.read(maxSize: maxSize)
@@ -139,6 +141,8 @@ open class AsyncChannelConnection<C: Channel>: AsyncConnection
             {
                 return try straw.read(maxSize: maxSize)
             }
+
+            await Task.yield()
         }
 
         return try straw.read(maxSize: maxSize)
