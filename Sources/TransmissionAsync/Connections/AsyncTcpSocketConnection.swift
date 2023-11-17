@@ -89,7 +89,7 @@ public class SocketReadable: Readable
 
             try self.socket.read(into: &data)
 
-            guard data.count > 0 else
+            if data.isEmpty, self.socket.remoteConnectionClosed
             {
                 throw AsyncTcpSocketConnectionError.remoteConnectionClosed
             }
