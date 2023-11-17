@@ -83,30 +83,34 @@ open class AsyncChannelConnection<C: Channel>: AsyncConnection
             return Data()
         }
 
+        // Fill the buffer
         while straw.count < maxSize
         {
-            do
+            // Read new data from the network
+            // It's important not to catch this try as that's how we signal the caller that the connection has been closed.
+            let data = try await self.reader.read()
+
+            // If we get zero bytes back
+            // We may have timed out
+            // Return whatever we have in the straw
+            guard data.count > 0 else
             {
-                let data = try await self.reader.read()
-                
-                // If we get zero bytes back
-                // We may have timed out
-                // Return whatever we have in the straw
-                guard data.count > 0 else
+                if straw.count > 0
                 {
                     return try straw.read(maxSize: maxSize)
                 }
-                
-                straw.write(data)
+                else
+                {
+                    return Data()
+                }
             }
-            catch
-            {
-                return try straw.read(maxSize: maxSize)
-            }
+
+            straw.write(data)
 
             await Task.yield()
         }
 
+        // We've filled the buffer up to maxSize, so we can return now.
         return try straw.read(maxSize: maxSize)
     }
 

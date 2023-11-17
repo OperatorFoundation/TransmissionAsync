@@ -89,6 +89,11 @@ public class SocketReadable: Readable
 
             try self.socket.read(into: &data)
 
+            guard data.count > 0 else
+            {
+                throw AsyncTcpSocketConnectionError.remoteConnectionClosed
+            }
+
             return data
         }
     }
@@ -193,4 +198,5 @@ public enum AsyncTcpSocketConnectionError: Error
 {
     case unimplemented
     case noData
+    case remoteConnectionClosed
 }

@@ -252,4 +252,48 @@ final class TransmissionAsyncTests: XCTestCase
 
         print("Received \(responseData.count) bytes of response data: \n\(responseData.hex)")
     }
+
+    func testReadMaxSizeClose() async throws
+    {
+        let serverClosed = expectation(description: "server closed successfully")
+
+        let listener = try AsyncTcpSocketListener(port: 1234, logger)
+        Task
+        {
+            let serverConnection = try await listener.accept()
+            print("Accepted connection.")
+
+            var data = try await serverConnection.readMaxSize(5) // First read, might be zero
+
+            while data.isEmpty
+            {
+                data = try await serverConnection.readMaxSize(5)
+            }
+
+            XCTAssertEqual(data.count, 5)
+            print("First read successful.")
+
+            do
+            {
+                data = try await serverConnection.readMaxSize(5) // Second read, might be zero
+
+                while data.isEmpty
+                {
+                    data = try await serverConnection.readMaxSize(5)
+                }
+            }
+            catch (let error)
+            {
+                print("Second read failed \(error)")
+                serverClosed.fulfill()
+            }
+        }
+
+        let data = Data(repeating: 65, count: 5)
+        let clientConnection = try await AsyncTcpSocketConnection("127.0.0.1", 1234, logger)
+        try await clientConnection.write(data)
+        try await clientConnection.close()
+
+        await fulfillment(of: [serverClosed], timeout: 10)
+    }
 }
