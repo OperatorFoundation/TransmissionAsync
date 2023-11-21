@@ -31,7 +31,7 @@ public class AsyncTcpSocketConnection: AsyncChannelConnection<SocketChannel>
 
     public init(_ socket: Socket, _ logger: Logger, verbose: Bool = false)
     {
-        let channel = SocketChannel(socket, logger: logger)
+        let channel = SocketChannel(socket, logger: logger, verbose: verbose)
 
         super.init(channel, logger, verbose: verbose)
     }
@@ -54,16 +54,22 @@ public class SocketChannel: Channel
 
     let socket: Socket
     let logger: Logger
+    let verbose: Bool
 
-    public init(_ socket: Socket, logger: Logger)
+    public init(_ socket: Socket, logger: Logger, verbose: Bool = false)
     {
         self.socket = socket
         self.logger = logger
+        self.verbose = verbose
     }
 
     public func close()
     {
-        self.logger.info("SocketChannel.close() was called explicitly")
+        if self.verbose
+        {
+            self.logger.info("SocketChannel.close() was called explicitly")
+        }
+
         self.socket.close()
     }
 }
@@ -72,12 +78,15 @@ public class SocketReadable: Readable
 {
     let socket: Socket
     let logger: Logger
+    let verbose: Bool
     let straw: UnsafeStraw
 
-    public init(_ socket: Socket, logger: Logger)
+    public init(_ socket: Socket, logger: Logger, verbose: Bool = false)
     {
         self.socket = socket
         self.logger = logger
+        self.verbose = verbose
+
         self.straw = UnsafeStraw()
     }
 
@@ -100,7 +109,10 @@ public class SocketReadable: Readable
 
     public func read(_ size: Int) async throws -> Data
     {
-        print("SocketReadable.read(\(size))")
+        if self.verbose
+        {
+            self.logger.debug("SocketReadable.read(\(size))")
+        }
 
         try self.socket.setBlocking(mode: true)
 
@@ -109,16 +121,27 @@ public class SocketReadable: Readable
             return Data()
         }
 
-        print("SocketReadable.read(\(size)) - starting Asynchronizer")
+        if self.verbose
+        {
+            self.logger.debug("SocketReadable.read(\(size)) - starting Asynchronizer")
+        }
+
         return try await AsyncAwaitAsynchronizer.async
         {
-            print("SocketReadable.read(\(size)) - entered Asynchronizer")
+            if self.verbose
+            {
+                self.logger.debug("SocketReadable.read(\(size)) - entered Asynchronizer")
+            }
 
             while self.straw.count < size
             {
                 var data: Data = Data()
 
-                print("SocketReadable.read(\(size)) - calling self.socket.read")
+                if self.verbose
+                {
+                    self.logger.debug("SocketReadable.read(\(size)) - calling self.socket.read")
+                }
+
                 try self.socket.read(into: &data)
 
                 self.straw.write(data)
