@@ -44,12 +44,12 @@ public class SocketChannel: Channel
 
     public var readable: SocketReadable
     {
-        return SocketReadable(self.socket, logger: self.logger)
+        return SocketReadable(self.socket, logger: self.logger, verbose: self.verbose)
     }
 
     public var writable: SocketWritable
     {
-        return SocketWritable(self.socket)
+        return SocketWritable(self.socket, logger: self.logger, verbose: self.verbose)
     }
 
     let socket: Socket
@@ -92,11 +92,31 @@ public class SocketReadable: Readable
 
     public func read() async throws -> Data
     {
+        if self.straw.count > 0
+        {
+            return try self.straw.read()
+        }
+
+        if self.verbose
+        {
+            self.logger.debug("SocketReadable.read()")
+        }
+
         return try await AsyncAwaitAsynchronizer.async
         {
             var data: Data = Data()
 
+            if self.verbose
+            {
+                self.logger.debug("SocketReadable.read() - reading from socket")
+            }
+
             try self.socket.read(into: &data)
+
+            if self.verbose
+            {
+                self.logger.debug("SocketReadable.read() - reading from socket \(data.count) bytes")
+            }
 
             if data.isEmpty, self.socket.remoteConnectionClosed
             {
@@ -142,7 +162,17 @@ public class SocketReadable: Readable
                     self.logger.debug("SocketReadable.read(\(size)) - calling self.socket.read")
                 }
 
+                if self.verbose
+                {
+                    self.logger.debug("SocketReadable.read(\(size)) - reading from socket")
+                }
+
                 try self.socket.read(into: &data)
+
+                if self.verbose
+                {
+                    self.logger.debug("SocketReadable.read(\(size)) - reading from socket \(data.count) bytes")
+                }
 
                 self.straw.write(data)
             }
@@ -196,10 +226,14 @@ public class SocketReadable: Readable
 public class SocketWritable: Writable
 {
     let socket: Socket
+    let logger: Logger
+    let verbose: Bool
 
-    public init(_ socket: Socket)
+    public init(_ socket: Socket, logger: Logger, verbose: Bool = false)
     {
         self.socket = socket
+        self.logger = logger
+        self.verbose = verbose
     }
 
     public func write(_ data: Data) async throws
