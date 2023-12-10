@@ -35,4 +35,9 @@ public class AsyncTcpSocketListener: AsyncListener
             return AsyncTcpSocketConnection(socket, self.logger)
         }
     }
+
+    public func close() async throws
+    {
+        self.listener.close()
+    }
 }

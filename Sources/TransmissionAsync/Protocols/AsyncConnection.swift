@@ -19,6 +19,9 @@ public protocol AsyncConnection
     // reads up to maxSize bytes
     func readMaxSize(_ maxSize: Int) async throws -> Data
 
+    // reads at least minSize bytes and up to maxSize bytes
+    func readMinMaxSize(_ minSize: Int, _ maxSize: Int) async throws -> Data
+
     func readWithLengthPrefix(prefixSizeInBits: Int) async throws -> Data
 
     func readWithLengthPrefixNonblocking(prefixSizeInBits: Int) async throws -> Data

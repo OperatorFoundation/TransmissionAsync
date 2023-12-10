@@ -31,7 +31,7 @@ public class AsyncTcpSocketConnection: AsyncChannelConnection<SocketChannel>
 
     public init(_ socket: Socket, _ logger: Logger, verbose: Bool = false)
     {
-        let channel = SocketChannel(socket, logger: logger)
+        let channel = SocketChannel(socket, logger: logger, verbose: verbose)
 
         super.init(channel, logger, verbose: verbose)
     }
@@ -44,26 +44,32 @@ public class SocketChannel: Channel
 
     public var readable: SocketReadable
     {
-        return SocketReadable(self.socket, logger: self.logger)
+        return SocketReadable(self.socket, logger: self.logger, verbose: self.verbose)
     }
 
     public var writable: SocketWritable
     {
-        return SocketWritable(self.socket)
+        return SocketWritable(self.socket, logger: self.logger, verbose: self.verbose)
     }
 
     let socket: Socket
     let logger: Logger
+    let verbose: Bool
 
-    public init(_ socket: Socket, logger: Logger)
+    public init(_ socket: Socket, logger: Logger, verbose: Bool = false)
     {
         self.socket = socket
         self.logger = logger
+        self.verbose = verbose
     }
 
     public func close()
     {
-        self.logger.info("SocketChannel.close() was called explicitly")
+        if self.verbose
+        {
+            self.logger.info("SocketChannel.close() was called explicitly")
+        }
+
         self.socket.close()
     }
 }
@@ -72,22 +78,50 @@ public class SocketReadable: Readable
 {
     let socket: Socket
     let logger: Logger
+    let verbose: Bool
     let straw: UnsafeStraw
 
-    public init(_ socket: Socket, logger: Logger)
+    public init(_ socket: Socket, logger: Logger, verbose: Bool = false)
     {
         self.socket = socket
         self.logger = logger
+        self.verbose = verbose
+
         self.straw = UnsafeStraw()
     }
 
     public func read() async throws -> Data
     {
+        if self.straw.count > 0
+        {
+            return try self.straw.read()
+        }
+
+        if self.verbose
+        {
+            self.logger.debug("SocketReadable.read()")
+        }
+
         return try await AsyncAwaitAsynchronizer.async
         {
             var data: Data = Data()
 
+            if self.verbose
+            {
+                self.logger.debug("SocketReadable.read() - reading from socket")
+            }
+
             try self.socket.read(into: &data)
+
+            if self.verbose
+            {
+                self.logger.debug("SocketReadable.read() - reading from socket \(data.count) bytes")
+            }
+
+            if data.isEmpty, self.socket.remoteConnectionClosed
+            {
+                throw AsyncTcpSocketConnectionError.remoteConnectionClosed
+            }
 
             return data
         }
@@ -95,6 +129,11 @@ public class SocketReadable: Readable
 
     public func read(_ size: Int) async throws -> Data
     {
+        if self.verbose
+        {
+            self.logger.debug("SocketReadable.read(\(size))")
+        }
+
         try self.socket.setBlocking(mode: true)
 
         if size == 0
@@ -102,13 +141,38 @@ public class SocketReadable: Readable
             return Data()
         }
 
+        if self.verbose
+        {
+            self.logger.debug("SocketReadable.read(\(size)) - starting Asynchronizer")
+        }
+
         return try await AsyncAwaitAsynchronizer.async
         {
+            if self.verbose
+            {
+                self.logger.debug("SocketReadable.read(\(size)) - entered Asynchronizer")
+            }
+
             while self.straw.count < size
             {
                 var data: Data = Data()
 
+                if self.verbose
+                {
+                    self.logger.debug("SocketReadable.read(\(size)) - calling self.socket.read")
+                }
+
+                if self.verbose
+                {
+                    self.logger.debug("SocketReadable.read(\(size)) - reading from socket")
+                }
+
                 try self.socket.read(into: &data)
+
+                if self.verbose
+                {
+                    self.logger.debug("SocketReadable.read(\(size)) - reading from socket \(data.count) bytes")
+                }
 
                 self.straw.write(data)
             }
@@ -162,10 +226,14 @@ public class SocketReadable: Readable
 public class SocketWritable: Writable
 {
     let socket: Socket
+    let logger: Logger
+    let verbose: Bool
 
-    public init(_ socket: Socket)
+    public init(_ socket: Socket, logger: Logger, verbose: Bool = false)
     {
         self.socket = socket
+        self.logger = logger
+        self.verbose = verbose
     }
 
     public func write(_ data: Data) async throws
@@ -187,4 +255,5 @@ public enum AsyncTcpSocketConnectionError: Error
 {
     case unimplemented
     case noData
+    case remoteConnectionClosed
 }
