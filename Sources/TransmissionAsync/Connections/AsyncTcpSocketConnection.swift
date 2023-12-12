@@ -174,6 +174,11 @@ public class SocketReadable: Readable
                     self.logger.debug("SocketReadable.read(\(size)) - reading from socket \(data.count) bytes")
                 }
 
+                if data.isEmpty, self.socket.remoteConnectionClosed
+                {
+                    throw AsyncTcpSocketConnectionError.remoteConnectionClosed
+                }
+
                 self.straw.write(data)
             }
 
