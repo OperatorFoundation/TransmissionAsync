@@ -17,14 +17,16 @@ public class AsyncTcpSocketListener: AsyncListener
 
     let listener: Socket
     let logger: Logger
+    let verbose: Bool
 
-    public init(host: String? = nil, port: Int, _ logger: Logger) throws
+    public init(host: String? = nil, port: Int, _ logger: Logger, verbose: Bool = false) throws
     {
         let listener = try Socket.create()
         try listener.listen(on: port, allowPortReuse: false)
 
         self.listener = listener
         self.logger = logger
+        self.verbose = verbose
     }
 
     public func accept() async throws -> AsyncConnection
@@ -32,7 +34,7 @@ public class AsyncTcpSocketListener: AsyncListener
         return try await AsyncAwaitAsynchronizer.async
         {
             let socket = try self.listener.acceptClientConnection(invokeDelegate: false)
-            return AsyncTcpSocketConnection(socket, self.logger)
+            return AsyncTcpSocketConnection(socket, self.logger, verbose: self.verbose)
         }
     }
 
