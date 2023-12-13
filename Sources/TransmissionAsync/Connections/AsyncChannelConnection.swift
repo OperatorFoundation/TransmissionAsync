@@ -62,17 +62,15 @@ open class AsyncChannelConnection<C: Channel>: AsyncConnection
             print("AsyncChannelConnection.readSize(\(size)) - \(size) <= \(self.straw.count)")
             return try self.straw.read(size: size)
         }
-        else
-        {
-            print("AsyncChannelConnection.readSize(\(size)) - \(size) > \(self.straw.count)")
-            let bytesNeeded = size - self.straw.count
-            print("AsyncChannelConnection.readSize(\(size)) - \(bytesNeeded) bytes needed")
 
-            print("AsyncChannelConnection.readSize(\(size)) - calling self.reader.read(\(bytesNeeded))")
-            let data = try await self.reader.read(bytesNeeded)
+        while size > self.straw.count
+        {
+            let data = try await self.reader.read()
+
             self.straw.write(data)
-            return try self.straw.read(size: size)
         }
+
+        return try self.straw.read(size: size)
     }
 
     /// Reads up to maxSize bytes
