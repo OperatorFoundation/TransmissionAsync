@@ -146,7 +146,7 @@ public class SocketReadable: Readable
             self.logger.debug("SocketReadable.read(\(size)) - starting Asynchronizer")
         }
 
-        return try await AsyncAwaitAsynchronizer.async
+        let result = try await AsyncAwaitAsynchronizer.async
         {
             if self.verbose
             {
@@ -171,11 +171,16 @@ public class SocketReadable: Readable
 
                 if self.verbose
                 {
-                    self.logger.debug("SocketReadable.read(\(size)) - reading from socket \(data.count) bytes")
+                    self.logger.debug("SocketReadable.read(\(size)) - read from socket \(data.count) bytes")
                 }
 
                 if data.isEmpty, self.socket.remoteConnectionClosed
                 {
+                    if self.verbose
+                    {
+                        self.logger.debug("SocketReadable.read(\(size)) - error reading from socket")
+                    }
+
                     throw AsyncTcpSocketConnectionError.remoteConnectionClosed
                 }
 
@@ -186,6 +191,18 @@ public class SocketReadable: Readable
 
             return try self.straw.read(size: size)
         }
+
+        if self.verbose
+        {
+            self.logger.debug("SocketReadable.read(\(size)) - left Asynchronizer")
+        }
+
+        if self.verbose
+        {
+            self.logger.debug("SocketReadable.read(\(size)) - returning \(result.count) bytes")
+        }
+
+        return result
     }
 
     public func readNonblocking(_ size: Int) async throws -> Data
