@@ -75,7 +75,7 @@ open class AsyncChannelConnection<C: Channel>: AsyncConnection
             print("AsyncChannelConnection.readSize(\(size)) - in loop, reading from socket")
             let data = try await self.reader.read()
 
-            print("AsyncChannelConnection.readSize(\(size)) - in loop, read \(data.count) bytes / \(size)")
+            print("AsyncChannelConnection.readSize(\(size)) - in loop, adding \(data.count) bytes to \(self.straw.count) to get \(data.count + self.straw.count)/\(size)")
 
             self.straw.write(data)
         }
