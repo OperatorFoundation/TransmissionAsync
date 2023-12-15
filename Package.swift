@@ -15,7 +15,7 @@ let package = Package(
         .executable(name: "TransmissionAsyncTester", targets: ["TransmissionAsyncTester"]),
     ],
     dependencies: [
-        .package(url: "https://github.com/apple/swift-log.git", from: "1.5.2"),
+        .package(url: "https://github.com/apple/swift-log", from: "1.5.2"),
         .package(url: "https://github.com/OperatorFoundation/BlueSocket", branch: "release"),
         .package(url: "https://github.com/OperatorFoundation/Chord", branch: "release"),
         .package(url: "https://github.com/OperatorFoundation/Datable", from: "4.0.0"),
