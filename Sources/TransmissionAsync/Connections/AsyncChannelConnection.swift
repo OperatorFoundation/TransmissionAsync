@@ -48,39 +48,38 @@ open class AsyncChannelConnection<C: Channel>: AsyncConnection
     // Reads exactly size bytes
     public func readSize(_ size: Int) async throws -> Data
     {
-        print("AsyncChannelConnection.readSize")
-        print("AsyncChannelConnection.readSize(\(size)) - straw: \(self.straw.count)")
+        logger.debug("AsyncChannelConnection.readSize(\(size)) - straw: \(self.straw.count)")
 
         if size == 0
         {
-            print("AsyncChannelConnection.readSize(\(size)) - size == 0")
+            logger.debug("AsyncChannelConnection.readSize(\(size)) - size == 0")
             return Data()
         }
 
         if size <= self.straw.count
         {
-            print("AsyncChannelConnection.readSize(\(size)) - plenty of bytes in straw")
+            logger.debug("AsyncChannelConnection.readSize(\(size)) - plenty of bytes in straw")
             let result = try self.straw.read(size: size)
 
-            print("AsyncChannelConnection.readSize(\(size)) - returning \(size) bytes, \(self.straw.count) left in straw")
+            logger.debug("AsyncChannelConnection.readSize(\(size)) - returning \(size) bytes, \(self.straw.count) left in straw")
 
             return result
         }
 
-        print("AsyncChannelConnection.readSize(\(size)) - not enough in straw, reading from socket")
-
-        print("AsyncChannelConnection.readSize(\(size)) - starting loop, while \(size) > \(self.straw.count)")
+        logger.debug("AsyncChannelConnection.readSize(\(size)) - not enough in straw, reading from socket")
+        logger.debug("AsyncChannelConnection.readSize(\(size)) - starting loop, while \(size) > \(self.straw.count)")
+        
         while size > self.straw.count
         {
-            print("AsyncChannelConnection.readSize(\(size)) - in loop, reading from socket")
+            logger.debug("AsyncChannelConnection.readSize(\(size)) - in loop, reading from socket")
             let data = try await self.reader.read()
 
-            print("AsyncChannelConnection.readSize(\(size)) - in loop, adding \(data.count) bytes to \(self.straw.count) to get \(data.count + self.straw.count)/\(size)")
+            logger.debug("AsyncChannelConnection.readSize(\(size)) - in loop, adding \(data.count) bytes to \(self.straw.count) to get \(data.count + self.straw.count)/\(size)")
 
             self.straw.write(data)
         }
 
-        print("AsyncChannelConnection.readSize(\(size)) - excited loop with \(self.straw.count) bytes in buffer")
+        logger.debug("AsyncChannelConnection.readSize(\(size)) - excited loop with \(self.straw.count) bytes in buffer")
 
         return try self.straw.read(size: size)
     }
