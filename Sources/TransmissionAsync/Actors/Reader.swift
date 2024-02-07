@@ -124,6 +124,11 @@ public actor Reader<T: Readable>
                 {
                     throw ReaderError.badLengthPrefix
                 }
+                
+                guard tempLength <= UInt64(Int.max) else
+                {
+                    throw ReaderError.lengthSizeTooBig
+                }
 
                 length = Int(tempLength)
 
@@ -230,6 +235,11 @@ public actor Reader<T: Readable>
                 {
                     throw ReaderError.badLengthPrefix
                 }
+                
+                guard tempLength <= UInt64(Int.max) else
+                {
+                    throw ReaderError.lengthSizeTooBig
+                }
 
                 length = Int(tempLength)
 
@@ -265,4 +275,5 @@ public enum ReaderError: Error
 {
     case badPrefixSize(Int)
     case badLengthPrefix
+    case lengthSizeTooBig
 }
