@@ -93,7 +93,7 @@ public actor Reader<T: Readable>
             case 8:
                 guard let tempLength = lengthBytes.uint8 else
                 {
-                    throw ReaderError.badLengthPrefix
+                    throw ReaderError.badLengthPrefix(lengthBytes.count)
                 }
 
                 length = Int(tempLength)
@@ -101,7 +101,7 @@ public actor Reader<T: Readable>
             case 16:
                 guard let tempLength = lengthBytes.maybeNetworkUint16 else
                 {
-                    throw ReaderError.badLengthPrefix
+                    throw ReaderError.badLengthPrefix(lengthBytes.count)
                 }
 
                 length = Int(tempLength)
@@ -114,7 +114,7 @@ public actor Reader<T: Readable>
                         self.logger.error("bad length prefix for 32 bits \(lengthBytes.count) \(lengthBytes.hex)")
                     }
 
-                    throw ReaderError.badLengthPrefix
+                    throw ReaderError.badLengthPrefix(lengthBytes.count)
                 }
 
                 length = Int(tempLength)
@@ -122,7 +122,12 @@ public actor Reader<T: Readable>
             case 64:
                 guard let tempLength = lengthBytes.maybeNetworkUint64 else
                 {
-                    throw ReaderError.badLengthPrefix
+                    throw ReaderError.badLengthPrefix(lengthBytes.count)
+                }
+                
+                guard tempLength <= UInt64(Int.max) else
+                {
+                    throw ReaderError.lengthSizeTooBig
                 }
 
                 length = Int(tempLength)
@@ -199,7 +204,7 @@ public actor Reader<T: Readable>
             case 8:
                 guard let tempLength = lengthBytes.uint8 else
                 {
-                    throw ReaderError.badLengthPrefix
+                    throw ReaderError.badLengthPrefix(lengthBytes.count)
                 }
 
                 length = Int(tempLength)
@@ -207,7 +212,7 @@ public actor Reader<T: Readable>
             case 16:
                 guard let tempLength = lengthBytes.maybeNetworkUint16 else
                 {
-                    throw ReaderError.badLengthPrefix
+                    throw ReaderError.badLengthPrefix(lengthBytes.count)
                 }
 
                 length = Int(tempLength)
@@ -220,7 +225,7 @@ public actor Reader<T: Readable>
                         self.logger.error("bad length prefix for 32 bits \(lengthBytes.count) \(lengthBytes.hex)")
                     }
 
-                    throw ReaderError.badLengthPrefix
+                    throw ReaderError.badLengthPrefix(lengthBytes.count)
                 }
 
                 length = Int(tempLength)
@@ -228,7 +233,12 @@ public actor Reader<T: Readable>
             case 64:
                 guard let tempLength = lengthBytes.maybeNetworkUint64 else
                 {
-                    throw ReaderError.badLengthPrefix
+                    throw ReaderError.badLengthPrefix(lengthBytes.count)
+                }
+                
+                guard tempLength <= UInt64(Int.max) else
+                {
+                    throw ReaderError.lengthSizeTooBig
                 }
 
                 length = Int(tempLength)
@@ -264,5 +274,6 @@ public actor Reader<T: Readable>
 public enum ReaderError: Error
 {
     case badPrefixSize(Int)
-    case badLengthPrefix
+    case badLengthPrefix(Int)
+    case lengthSizeTooBig
 }

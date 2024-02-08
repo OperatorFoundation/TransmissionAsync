@@ -16,19 +16,14 @@ public class AsyncTcpSocketConnection: AsyncChannelConnection<SocketChannel>
 {
     public convenience init(_ host: String, _ port: Int, _ logger: Logger, verbose: Bool = false) async throws
     {
-        try ConcurrencyTester.test("• AsyncTcpSocketConnection convenience init start.")
-        
         let socket = try Socket.create()
         try socket.setBlocking(mode: false)
         try socket.setReadTimeout(value: 1 * 1000) // 1 second in milliseconds
         try socket.setWriteTimeout(value: 1 * 1000) // 1 seconds in milliseconds
-        
-        try ConcurrencyTester.test("• AsyncTcpSocketConnection entering AsyncAwaitAsynchronizer.")
+
         try await AsyncAwaitAsynchronizer.async
         {
-            try ConcurrencyTester.test("• AsyncTcpSocketConnection AsyncAwaitAsynchronizer calling connect.")
             try socket.connect(to: host, port: Int32(port), timeout: 30 * 1000) // 30 seconds in milliseconds
-            try ConcurrencyTester.test("• AsyncTcpSocketConnection AsyncAwaitAsynchronizer returned from connect.")
         }
 
         self.init(socket, logger, verbose: verbose)
