@@ -19,7 +19,7 @@ let package = Package(
         .package(url: "https://github.com/OperatorFoundation/BlueSocket", branch: "1.1.1"),
         .package(url: "https://github.com/OperatorFoundation/Chord", branch: "0.1.1"),
         .package(url: "https://github.com/OperatorFoundation/Datable", from: "4.0.0"),
-        .package(url: "https://github.com/OperatorFoundation/Straw", branch: "release"),
+        .package(url: "https://github.com/OperatorFoundation/Straw", branch: "1.0.0"),
         .package(url: "https://github.com/OperatorFoundation/SwiftHexTools", branch: "1.2.6"),
     ],
     targets: [
