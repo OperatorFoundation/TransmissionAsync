@@ -148,7 +148,7 @@ open class AsyncChannelConnection<C: Channel>: AsyncConnection
             
             if someData.count == 0
             {
-                someData = try await self.readSize(minSize)
+                someData = try await self.reader.read(minSize)
             }
             
             self.straw.write(someData)
