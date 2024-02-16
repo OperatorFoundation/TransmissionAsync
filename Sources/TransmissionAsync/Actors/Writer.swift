@@ -77,6 +77,11 @@ public actor Writer<T: Writable>
         }
         
         logger.debug("TransmissionAsync.writeWithLengthPrefix: Writing length bytes: \(lengthBytes.hex) + data (\(data.count) bytes)")
+        
+        if lengthBytes[0] > 0
+        {
+            logger.debug("🦠 Weird lengthBytes[0] value: \(lengthBytes[0])")
+        }
 
         try await self.writable.write(lengthBytes + data)
     }
