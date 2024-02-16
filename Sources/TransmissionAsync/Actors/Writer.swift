@@ -33,6 +33,8 @@ public actor Writer<T: Writable>
     public func writeWithLengthPrefix(_ data: Data, _ prefixSizeInBits: Int) async throws
     {
         let length: Int = data.count
+        
+        logger.debug("TransmissionAsync.writeWithLengthPrefix: length of data to write is \(length)")
 
         let lengthBytes: Data
         switch prefixSizeInBits
@@ -73,6 +75,8 @@ public actor Writer<T: Writable>
             default:
                 throw WriterError.badLengthPrefix
         }
+        
+        logger.debug("TransmissionAsync.writeWithLengthPrefix: Writing length bytes: \(lengthBytes.hex) + data (\(data.count) bytes)")
 
         try await self.writable.write(lengthBytes + data)
     }
