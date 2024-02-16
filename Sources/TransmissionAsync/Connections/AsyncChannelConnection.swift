@@ -141,11 +141,14 @@ open class AsyncChannelConnection<C: Channel>: AsyncConnection
         }
 
         self.logger.debug("AsyncChannelConnection.readMinMaxSize(\(minSize), \(maxSize)) - calling self.reader.read(\(minSize))")
-
-        let minData = try await self.reader.read(minSize)
-        self.straw.write(minData)
-        self.logger.debug("AsyncChannelConnection.readMinMaxSize(\(minSize), \(maxSize)) - read minimum data \(minData.count) / \(minSize)")
-
+        
+        while self.straw.count < minSize
+        {
+            let someData = try await self.reader.read()
+            self.straw.write(someData)
+            self.logger.debug("AsyncChannelConnection.readMinMaxSize(\(minSize), \(maxSize)) - read some data \(someData.count) / \(minSize)")
+        }
+        
         let dataSize = min(maxSize, self.straw.count)
 
         return try straw.read(maxSize: dataSize)
