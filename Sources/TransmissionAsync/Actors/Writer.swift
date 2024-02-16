@@ -32,6 +32,8 @@ public actor Writer<T: Writable>
 
     public func writeWithLengthPrefix(_ data: Data, _ prefixSizeInBits: Int) async throws
     {
+        print("🦠 TransmissionAsync Called")
+        
         let length: Int = data.count
         
         logger.debug("TransmissionAsync.writeWithLengthPrefix: length of data to write is \(length)")
