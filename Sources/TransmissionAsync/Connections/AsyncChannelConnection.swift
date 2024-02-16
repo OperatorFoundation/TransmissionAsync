@@ -18,7 +18,6 @@ open class AsyncChannelConnection<C: Channel>: AsyncConnection
     let reader: Reader<C.R>
     let writer: Writer<C.W>
     let logger: Logger
-    let verbose: Bool
 
     let straw: UnsafeStraw = UnsafeStraw()
 
@@ -26,8 +25,6 @@ open class AsyncChannelConnection<C: Channel>: AsyncConnection
     {
         self.channel = channel
         self.logger = logger
-        self.verbose = verbose
-
         self.reader = Reader(channel.readable, logger, verbose: verbose)
         self.writer = Writer(channel.writable, logger)
     }
@@ -126,10 +123,7 @@ open class AsyncChannelConnection<C: Channel>: AsyncConnection
     // reads at least minSize bytes and up to maxSize bytes
     public func readMinMaxSize(_ minSize: Int, _ maxSize: Int) async throws -> Data
     {
-        if self.verbose
-        {
-            self.logger.debug("AsyncChannelConnection.readMinMaxSize(\(minSize), \(maxSize))")
-        }
+        self.logger.debug("AsyncChannelConnection.readMinMaxSize(\(minSize), \(maxSize))")
 
         guard maxSize >= minSize else
         {
@@ -146,18 +140,11 @@ open class AsyncChannelConnection<C: Channel>: AsyncConnection
             return Data()
         }
 
-        if verbose
-        {
-            self.logger.debug("AsyncChannelConnection.readMinMaxSize(\(minSize), \(maxSize)) - calling self.reader.read(\(minSize))")
-        }
+        self.logger.debug("AsyncChannelConnection.readMinMaxSize(\(minSize), \(maxSize)) - calling self.reader.read(\(minSize))")
 
         let minData = try await self.reader.read(minSize)
         self.straw.write(minData)
-
-        if verbose
-        {
-            self.logger.debug("AsyncChannelConnection.readMinMaxSize(\(minSize), \(maxSize)) - read minimum data \(minData.count) / \(minSize)")
-        }
+        self.logger.debug("AsyncChannelConnection.readMinMaxSize(\(minSize), \(maxSize)) - read minimum data \(minData.count) / \(minSize)")
 
         let dataSize = min(maxSize, self.straw.count)
 
@@ -166,25 +153,16 @@ open class AsyncChannelConnection<C: Channel>: AsyncConnection
 
     public func readWithLengthPrefix(prefixSizeInBits: Int) async throws -> Data
     {
-        if self.verbose
-        {
-            self.logger.debug("AsyncChannelConnection.readWithLengthPrefix(\(prefixSizeInBits))")
-        }
+        self.logger.debug("AsyncChannelConnection.readWithLengthPrefix(\(prefixSizeInBits))")
 
-        if self.verbose
-        {
-            self.logger.debug("AsyncChannelConnection.readWithLengthPrefix - reading length bytes")
-        }
+        self.logger.debug("AsyncChannelConnection.readWithLengthPrefix - reading length bytes")
 
         return try await self.reader.readWithLengthPrefix(prefixSizeInBits)
     }
 
     public func readWithLengthPrefixNonblocking(prefixSizeInBits: Int) async throws -> Data
     {
-        if self.verbose
-        {
-            self.logger.debug("AsyncChannelConnection.readWithLengthPrefix(size: \(prefixSizeInBits))")
-        }
+        self.logger.debug("AsyncChannelConnection.readWithLengthPrefix(size: \(prefixSizeInBits))")
 
         return try await self.reader.readWithLengthPrefixNonblocking(prefixSizeInBits)
     }
