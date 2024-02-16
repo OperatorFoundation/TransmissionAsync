@@ -144,9 +144,22 @@ open class AsyncChannelConnection<C: Channel>: AsyncConnection
         
         while self.straw.count < minSize
         {
-            let someData = try await self.reader.read()
+            var someData = try await self.reader.read()
+            
+            if someData.count == 0
+            {
+                someData = try await self.readSize(minSize)
+            }
+            
             self.straw.write(someData)
+            
             self.logger.debug("AsyncChannelConnection.readMinMaxSize(\(minSize), \(maxSize)) - read some data \(someData.count) / \(minSize)")
+        }
+        
+        if self.straw.count < maxSize
+        {
+            let smoreData = try await self.reader.read()
+            self.straw.write(smoreData)
         }
         
         let dataSize = min(maxSize, self.straw.count)
