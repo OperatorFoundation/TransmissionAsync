@@ -11,12 +11,13 @@ import Logging
 public actor Writer<T: Writable>
 {
     let writable: T
-    let logger: Logger
+    var logger: Logger
 
     public init(_ writable: T, _ logger: Logger)
     {
         self.writable = writable
         self.logger = logger
+        self.logger.logLevel = Logger.Level.debug
     }
 
     public func write(_ data: Data) async throws
