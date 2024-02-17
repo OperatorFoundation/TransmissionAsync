@@ -21,22 +21,24 @@ public actor Writer<T: Writable>
 
     public func write(_ data: Data) async throws
     {
+        print("🦠 TransmissionAsync.Writer<\(writable)>.write(data: \(data.count) bytes")
         try await self.writable.write(data)
     }
 
     public func write(_ datas: [Data]) async throws
     {
+        print("🦠 TransmissionAsync.Writer<\(writable)>.write(datas: \(datas.count) items")
         let data = datas.reduce(Data(), (+))
         try await self.writable.write(data)
     }
 
     public func writeWithLengthPrefix(_ data: Data, _ prefixSizeInBits: Int) async throws
     {
-        print("🦠 TransmissionAsync Called")
+        print("🦠 TransmissionAsync.Writer<\(writable)>.writeWithLengthPrefix(data: \(data.count) bytes, prefixSizeInBits: \(prefixSizeInBits)")
         
         let length: Int = data.count
         
-        logger.debug("TransmissionAsync.writeWithLengthPrefix: length of data to write is \(length)")
+        logger.debug("TransmissionAsync.Writer<\(writable)>.writeWithLengthPrefix: length of data to write is \(length)")
 
         let lengthBytes: Data
         switch prefixSizeInBits
