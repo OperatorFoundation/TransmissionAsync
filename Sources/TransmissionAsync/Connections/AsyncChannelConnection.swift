@@ -17,7 +17,7 @@ open class AsyncChannelConnection<C: Channel>: AsyncConnection
     let channel: C
     let reader: Reader<C.R>
     let writer: Writer<C.W>
-    let logger: Logger
+    var logger: Logger
 
     let straw: UnsafeStraw = UnsafeStraw()
 
@@ -27,6 +27,7 @@ open class AsyncChannelConnection<C: Channel>: AsyncConnection
         self.logger = logger
         self.reader = Reader(channel.readable, logger, verbose: verbose)
         self.writer = Writer(channel.writable, logger)
+        self.logger.logLevel = Logger.Level.debug
     }
 
     // Reads an amount of data decided by magic
@@ -145,20 +146,24 @@ open class AsyncChannelConnection<C: Channel>: AsyncConnection
         while self.straw.count < minSize
         {
             var someData = try await self.reader.read()
+            self.logger.debug("\n🦠 AsyncChannelConnection<\(self.channel)>.readMinMaxSize(): First call to read() returned \(someData.count) bytes")
             
             if someData.count == 0
             {
+                
                 someData = try await self.reader.read(minSize)
+                self.logger.debug("🦠 AsyncChannelConnection<\(self.channel)>.readMinMaxSize(): call to read(size: 1) returned \(someData.count) bytes")
             }
             
             self.straw.write(someData)
             
-            self.logger.debug("AsyncChannelConnection<\(self.channel)>.readMinMaxSize(\(minSize), \(maxSize)) - read some data \(someData.count) / \(minSize)")
+            self.logger.debug("🦠 AsyncChannelConnection<\(self.channel)>.readMinMaxSize(\(minSize), \(maxSize)) - read some data \(someData.count) / \(minSize)")
         }
         
         if self.straw.count < maxSize
         {
             let smoreData = try await self.reader.read()
+            self.logger.debug("AsyncChannelConnection<\(self.channel)>.readMinMaxSize(): Second call to read() returned \(smoreData.count) bytes\n")
             self.straw.write(smoreData)
         }
         
