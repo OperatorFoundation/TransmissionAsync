@@ -17,25 +17,24 @@ public actor Writer<T: Writable>
     {
         self.writable = writable
         self.logger = logger
-        self.logger.logLevel = Logger.Level.debug
     }
 
     public func write(_ data: Data) async throws
     {
-        logger.debug("🦠 TransmissionAsync.Writer<\(writable)>.write(data: \(data.count) bytes")
+        logger.debug("TransmissionAsync.Writer<\(writable)>.write(data: \(data.count) bytes")
         try await self.writable.write(data)
     }
 
     public func write(_ datas: [Data]) async throws
     {
-        logger.debug("🦠 TransmissionAsync.Writer<\(writable)>.write(datas: \(datas.count) items")
+        logger.debug("TransmissionAsync.Writer<\(writable)>.write(datas: \(datas.count) items")
         let data = datas.reduce(Data(), (+))
         try await self.writable.write(data)
     }
 
     public func writeWithLengthPrefix(_ data: Data, _ prefixSizeInBits: Int) async throws
     {
-        logger.debug("🦠 TransmissionAsync.Writer<\(writable)>.writeWithLengthPrefix(data: \(data.count) bytes, prefixSizeInBits: \(prefixSizeInBits)")
+        logger.debug("TransmissionAsync.Writer<\(writable)>.writeWithLengthPrefix(data: \(data.count) bytes, prefixSizeInBits: \(prefixSizeInBits)")
         
         let length: Int = data.count
         

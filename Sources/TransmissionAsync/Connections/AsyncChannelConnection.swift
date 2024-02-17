@@ -27,7 +27,6 @@ open class AsyncChannelConnection<C: Channel>: AsyncConnection
         self.logger = logger
         self.reader = Reader(channel.readable, logger, verbose: verbose)
         self.writer = Writer(channel.writable, logger)
-        self.logger.logLevel = Logger.Level.debug
     }
 
     // Reads an amount of data decided by magic
@@ -46,38 +45,38 @@ open class AsyncChannelConnection<C: Channel>: AsyncConnection
     // Reads exactly size bytes
     public func readSize(_ size: Int) async throws -> Data
     {
-        print("AsyncChannelConnection<\(self.channel)>.readSize(\(size)) - straw: \(self.straw.count)")
+        logger.debug("AsyncChannelConnection<\(self.channel)>.readSize(\(size)) - straw: \(self.straw.count)")
 
         if size == 0
         {
-            print("AsyncChannelConnection<\(self.channel)>.readSize(\(size)) - size == 0")
+            logger.debug("AsyncChannelConnection<\(self.channel)>.readSize(\(size)) - size == 0")
             return Data()
         }
 
         if size <= self.straw.count
         {
-            print("AsyncChannelConnection<\(self.channel)>.readSize(\(size)) - plenty of bytes in straw")
+            logger.debug("AsyncChannelConnection<\(self.channel)>.readSize(\(size)) - plenty of bytes in straw")
             let result = try self.straw.read(size: size)
 
-            print("AsyncChannelConnection<\(self.channel)>.readSize(\(size)) - returning \(size) bytes, \(self.straw.count) left in straw")
+            logger.debug("AsyncChannelConnection<\(self.channel)>.readSize(\(size)) - returning \(size) bytes, \(self.straw.count) left in straw")
 
             return result
         }
 
-        print("AsyncChannelConnection<\(self.channel)>.readSize(\(size)) - not enough in straw, reading from socket")
-        print("AsyncChannelConnection<\(self.channel)>.readSize(\(size)) - starting loop, while \(size) > \(self.straw.count)")
+        logger.debug("AsyncChannelConnection<\(self.channel)>.readSize(\(size)) - not enough in straw, reading from socket")
+        logger.debug("AsyncChannelConnection<\(self.channel)>.readSize(\(size)) - starting loop, while \(size) > \(self.straw.count)")
         
         while size > self.straw.count
         {
-            print("AsyncChannelConnection<\(self.channel)>.readSize(\(size)) - in loop, reading from socket")
+            logger.debug("AsyncChannelConnection<\(self.channel)>.readSize(\(size)) - in loop, reading from socket")
             let data = try await self.reader.read()
 
-            print("AsyncChannelConnection<\(self.channel)>.readSize(\(size)) - in loop, adding \(data.count) bytes to \(self.straw.count) to get \(data.count + self.straw.count)/\(size)")
+            logger.debug("AsyncChannelConnection<\(self.channel)>.readSize(\(size)) - in loop, adding \(data.count) bytes to \(self.straw.count) to get \(data.count + self.straw.count)/\(size)")
 
             self.straw.write(data)
         }
 
-        print("AsyncChannelConnection<\(self.channel)>.readSize(\(size)) - excited loop with \(self.straw.count) bytes in buffer")
+        logger.debug("AsyncChannelConnection<\(self.channel)>.readSize(\(size)) - excited loop with \(self.straw.count) bytes in buffer")
 
         return try self.straw.read(size: size)
     }
@@ -124,7 +123,7 @@ open class AsyncChannelConnection<C: Channel>: AsyncConnection
     // reads at least minSize bytes and up to maxSize bytes
     public func readMinMaxSize(_ minSize: Int, _ maxSize: Int) async throws -> Data
     {
-        print("AsyncChannelConnection<\(self.channel)>.readMinMaxSize(\(minSize), \(maxSize))")
+        logger.debug("AsyncChannelConnection<\(self.channel)>.readMinMaxSize(\(minSize), \(maxSize))")
 
         guard maxSize >= minSize else
         {
@@ -141,29 +140,25 @@ open class AsyncChannelConnection<C: Channel>: AsyncConnection
             return Data()
         }
 
-        print("AsyncChannelConnection<\(self.channel)>.readMinMaxSize(\(minSize), \(maxSize)) - calling self.reader.read(\(minSize))")
+        logger.debug("AsyncChannelConnection<\(self.channel)>.readMinMaxSize(\(minSize), \(maxSize)) - calling self.reader.read(\(minSize))")
         
         while self.straw.count < minSize
         {
             var someData = try await self.reader.read()
-            print("\n🦠 AsyncChannelConnection<\(self.channel)>.readMinMaxSize(): First call to read() returned \(someData.count) bytes")
             
             if someData.count == 0
             {
                 
                 someData = try await self.reader.read(minSize)
-                print("🦠 AsyncChannelConnection<\(self.channel)>.readMinMaxSize(): call to read(size: 1) returned \(someData.count) bytes")
             }
             
             self.straw.write(someData)
-            
-            print("🦠 AsyncChannelConnection<\(self.channel)>.readMinMaxSize(\(minSize), \(maxSize)) - read some data \(someData.count) / \(minSize)")
         }
         
         if self.straw.count < maxSize
         {
             let smoreData = try await self.reader.read()
-            print("AsyncChannelConnection<\(self.channel)>.readMinMaxSize(): Second call to read() returned \(smoreData.count) bytes\n")
+            logger.debug("AsyncChannelConnection<\(self.channel)>.readMinMaxSize(): Second call to read() returned \(smoreData.count) bytes\n")
             self.straw.write(smoreData)
         }
         
@@ -174,16 +169,14 @@ open class AsyncChannelConnection<C: Channel>: AsyncConnection
 
     public func readWithLengthPrefix(prefixSizeInBits: Int) async throws -> Data
     {
-        print("AsyncChannelConnection<\(self.channel)>.readWithLengthPrefix(\(prefixSizeInBits))")
-
-        print("AsyncChannelConnection<\(self.channel)>.readWithLengthPrefix - reading length bytes")
+        logger.debug("AsyncChannelConnection<\(self.channel)>.readWithLengthPrefix(\(prefixSizeInBits))")
 
         return try await self.reader.readWithLengthPrefix(prefixSizeInBits)
     }
 
     public func readWithLengthPrefixNonblocking(prefixSizeInBits: Int) async throws -> Data
     {
-        print("AsyncChannelConnection<\(self.channel)>.readWithLengthPrefix(size: \(prefixSizeInBits))")
+        logger.debug("AsyncChannelConnection<\(self.channel)>.readWithLengthPrefix(size: \(prefixSizeInBits))")
 
         return try await self.reader.readWithLengthPrefixNonblocking(prefixSizeInBits)
     }
@@ -195,13 +188,13 @@ open class AsyncChannelConnection<C: Channel>: AsyncConnection
 
     public func write(_ data: Data) async throws
     {
-        print("AsyncChannelConnection<\(self.channel)>.write(data: (\(data.count)) bytes)")
+        logger.debug("AsyncChannelConnection<\(self.channel)>.write(data: (\(data.count)) bytes)")
         try await self.writer.write(data)
     }
 
     public func writeWithLengthPrefix(_ data: Data, _ prefixSizeInBits: Int) async throws
     {
-        print("AsyncChannelConnection<\(self.channel)>.writeWithLengthPrefix(data: (\(data.count)) bytes, size: \(prefixSizeInBits))")
+        logger.debug("AsyncChannelConnection<\(self.channel)>.writeWithLengthPrefix(data: (\(data.count)) bytes, size: \(prefixSizeInBits))")
         try await self.writer.writeWithLengthPrefix(data, prefixSizeInBits)
     }
 
