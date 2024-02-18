@@ -11,7 +11,7 @@ import Logging
 public actor Writer<T: Writable>
 {
     let writable: T
-    let logger: Logger
+    var logger: Logger
 
     public init(_ writable: T, _ logger: Logger)
     {
@@ -21,18 +21,24 @@ public actor Writer<T: Writable>
 
     public func write(_ data: Data) async throws
     {
+        logger.debug("TransmissionAsync.Writer<\(writable)>.write(data: \(data.count) bytes")
         try await self.writable.write(data)
     }
 
     public func write(_ datas: [Data]) async throws
     {
+        logger.debug("TransmissionAsync.Writer<\(writable)>.write(datas: \(datas.count) items")
         let data = datas.reduce(Data(), (+))
         try await self.writable.write(data)
     }
 
     public func writeWithLengthPrefix(_ data: Data, _ prefixSizeInBits: Int) async throws
     {
+        logger.debug("TransmissionAsync.Writer<\(writable)>.writeWithLengthPrefix(data: \(data.count) bytes, prefixSizeInBits: \(prefixSizeInBits)")
+        
         let length: Int = data.count
+        
+        logger.debug("TransmissionAsync.Writer<\(writable)>.writeWithLengthPrefix: length of data to write is \(length)")
 
         let lengthBytes: Data
         switch prefixSizeInBits
@@ -72,6 +78,13 @@ public actor Writer<T: Writable>
 
             default:
                 throw WriterError.badLengthPrefix
+        }
+        
+        logger.debug("TransmissionAsync.writeWithLengthPrefix: Writing length bytes: \(lengthBytes.hex) + data (\(data.count) bytes)")
+        
+        if lengthBytes[0] > 0
+        {
+            logger.debug("🦠 Weird lengthBytes[0] value: \(lengthBytes[0])")
         }
 
         try await self.writable.write(lengthBytes + data)
