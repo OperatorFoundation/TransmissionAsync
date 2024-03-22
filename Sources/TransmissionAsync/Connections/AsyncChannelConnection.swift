@@ -145,26 +145,36 @@ open class AsyncChannelConnection<C: Channel>: AsyncConnection
         while self.straw.count < minSize
         {
             var someData = try await self.reader.read()
+            logger.debug("AsyncChannelConnection<\(self.channel)>.readMinMaxSize(\(minSize), \(maxSize)) - self.reader.read() read \(someData.count) bytes")
             
             if someData.count == 0
             {
                 
                 someData = try await self.reader.read(minSize)
+                logger.debug("AsyncChannelConnection<\(self.channel)>.readMinMaxSize(\(minSize), \(maxSize)) - self.reader.read(\(minSize)) retried because the last read returned 0 bytes. Read \(someData.count) bytes")
             }
             
+            
             self.straw.write(someData)
+            logger.debug("AsyncChannelConnection<\(self.channel)>.readMinMaxSize(\(minSize), \(maxSize)) - wrote \(someData.count) bytes")
+            logger.debug("AsyncChannelConnection<\(self.channel)>.readMinMaxSize(\(minSize), \(maxSize)) - Straw has \(self.straw.count) bytes")
         }
         
-        if self.straw.count < maxSize
-        {
-            let smoreData = try await self.reader.read()
-            logger.debug("AsyncChannelConnection<\(self.channel)>.readMinMaxSize(): Second call to read() returned \(smoreData.count) bytes\n")
-            self.straw.write(smoreData)
-        }
+        logger.debug("AsyncChannelConnection<\(self.channel)>.readMinMaxSize(\(minSize), \(maxSize)) - done with read loop!")
+        
+//        if self.straw.count < maxSize
+//        {
+//            logger.debug("AsyncChannelConnection<\(self.channel)>.readMinMaxSize(\(minSize), \(maxSize)) - calling reader.read() because straw size (\(self.straw.count)) is less than max size (\(maxSize))")
+//            let smoreData = try await self.reader.read()
+//            logger.debug("AsyncChannelConnection<\(self.channel)>.readMinMaxSize(): Second call to read() returned \(smoreData.count) bytes\n")
+//            self.straw.write(smoreData)
+//        }
         
         let dataSize = min(maxSize, self.straw.count)
-
-        return try straw.read(maxSize: dataSize)
+        
+        let final = try straw.read(maxSize: dataSize)
+        logger.debug("AsyncChannelConnection<\(self.channel)>.readMinMaxSize(\(minSize), \(maxSize)) - returning \(final.count)bytes from straw done with function!")
+        return final
     }
 
     public func readWithLengthPrefix(prefixSizeInBits: Int) async throws -> Data
