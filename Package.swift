@@ -1,12 +1,14 @@
-// swift-tools-version: 5.9
+// swift-tools-version: 5.10
 // The swift-tools-version declares the minimum version of Swift required to build this package.
-// DO NOT UPDATE TO 5.8, IT BREAKS CONCURRENCY ON LINUX
 
 import PackageDescription
 
 let package = Package(
     name: "TransmissionAsync",
-    platforms: [.macOS(.v13), .iOS(.v16)],
+    platforms: [
+        .macOS(.v14), 
+        .iOS(.v16),
+    ],
     products: [
         // Products define the executables and libraries a package produces, and make them visible to other packages.
         .library(
