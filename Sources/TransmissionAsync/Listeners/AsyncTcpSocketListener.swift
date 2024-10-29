@@ -31,15 +31,26 @@ public class AsyncTcpSocketListener: AsyncListener
 
     public func accept() async throws -> AsyncConnection
     {
-        return try await AsyncAwaitAsynchronizer.async
+        let result: any AsyncConnection = try await AsyncAwaitAsynchronizer.async<any AsyncConnection>
         {
-            let socket = try self.listener.acceptClientConnection(invokeDelegate: false)
+            guard let socket = try? self.listener.acceptClientConnection(invokeDelegate: false) else
+            {
+                throw AsyncTcpSocketListenerError.socketError
+            }
+
             return AsyncTcpSocketConnection(socket, self.logger, verbose: self.verbose)
         }
+
+        return result
     }
 
     public func close() async throws
     {
         self.listener.close()
     }
+}
+
+public enum AsyncTcpSocketListenerError: Error
+{
+    case socketError
 }
